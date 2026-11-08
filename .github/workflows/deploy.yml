@@ -42,17 +42,36 @@ jobs:
 
       - name: Choose GitHub Pages base path
         id: base
+        env:
+          BASE_PATH: ${{ vars.VITE_BASE_PATH }}
         run: |
-          REPO="${GITHUB_REPOSITORY#*/}"
-          if [[ "$REPO" == *.github.io ]]; then
-            echo "path=/" >> "$GITHUB_OUTPUT"
+          if [[ -n "${BASE_PATH}" ]]; then
+            echo "path=${BASE_PATH}" >> "$GITHUB_OUTPUT"
           else
-            echo "path=/${REPO}/" >> "$GITHUB_OUTPUT"
+            REPO="${GITHUB_REPOSITORY#*/}"
+            if [[ "$REPO" == *.github.io ]]; then
+              echo "path=/" >> "$GITHUB_OUTPUT"
+            else
+              echo "path=/${REPO}/" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Set public site origin
+        id: site
+        env:
+          SITE_URL: ${{ vars.VITE_SITE_URL }}
+        run: |
+          if [[ -n "${SITE_URL}" ]]; then
+            echo "origin=${SITE_URL%/}" >> "$GITHUB_OUTPUT"
+          else
+            echo "origin=https://${GITHUB_REPOSITORY_OWNER}.github.io" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Build production application
         env:
           VITE_BASE_PATH: ${{ steps.base.outputs.path }}
+          VITE_SITE_URL: ${{ steps.site.outputs.origin }}
+          VITE_GOOGLE_SITE_VERIFICATION: ${{ vars.VITE_GOOGLE_SITE_VERIFICATION }}
           VITE_ANALYTICS_ENABLED: ${{ vars.VITE_ANALYTICS_ENABLED }}
           VITE_CF_BEACON_TOKEN: ${{ vars.VITE_CF_BEACON_TOKEN }}
           VITE_SITE_OWNER: ${{ vars.VITE_SITE_OWNER }}

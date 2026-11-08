@@ -125,11 +125,22 @@ The workflow in `.github/workflows/deploy.yml` is ready. It has not been run fro
    - `VITE_SITE_OWNER`
    - `VITE_CONTACT_EMAIL`
    - `VITE_GITHUB_REPO_URL` as an `https://github.com/...` URL
+   - `VITE_SITE_URL` as an origin with no path, such as `https://images.example.com`, when the public site is not `https://<owner>.github.io`
+   - `VITE_BASE_PATH` when the published path is not the repository name, such as `/` for a project site on a custom domain
+   - `VITE_GOOGLE_SITE_VERIFICATION` with the Search Console token, if you want the meta tag
 4. Push to `main` or `master`, or run the **Deploy GitHub Pages** workflow manually.
 5. The workflow runs lint, formatting, typecheck, and unit tests before it uploads the site. A failed check stops deployment.
 6. For a project repository named `gitsImageResize`, the published path is `https://<username>.github.io/gitsImageResize/`. The workflow sets that base path from the repository name. A repository named `*.github.io` is published at `/`.
 
 Later updates deploy when you push to `main` or `master`.
+
+## Search engines
+
+Each public route is written to its own HTML file during `npm run build`, with a unique title, description, canonical URL, Open Graph tags, and JSON-LD. GitHub Pages serves those files with HTTP 200. Unknown addresses still use `404.html`, which asks crawlers not to index the miss.
+
+The build also writes `robots.txt` and `sitemap.xml`. Canonical URLs use `VITE_SITE_URL` plus `VITE_BASE_PATH`. Leave `VITE_SITE_URL` unset locally and the production workflow uses `https://<owner>.github.io`. Set it when a custom domain is the public address. Do not put a path in `VITE_SITE_URL`.
+
+Directory routes such as `/about/` are the canonical addresses. The in-app links omit the trailing slash, and GitHub Pages redirects those requests to the directory. The visible FAQ on the home page is the same text as the FAQ structured data.
 
 ## Cloudflare Analytics setup
 

@@ -1,9 +1,11 @@
 import { Link } from 'react-router'
+import { Breadcrumbs } from '../components/seo/Breadcrumbs.tsx'
 
 export function NotFound() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-16">
-      <h1 className="text-3xl font-semibold text-slate-950 dark:text-white">
+      <Breadcrumbs current="Page not found" />
+      <h1 className="mt-6 text-3xl font-semibold text-slate-950 dark:text-white">
         Page not found
       </h1>
       <p className="mt-3 text-slate-600 dark:text-slate-300">

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Breadcrumbs } from '../components/seo/Breadcrumbs.tsx'
 
 export function DraftNotice() {
   return (
@@ -18,7 +19,10 @@ export function DraftNotice() {
 export function LegalPage({ title, children }: { title: string; children: ReactNode }) {
   return (
     <article className="mx-auto max-w-3xl px-4 py-12">
-      <DraftNotice />
+      <Breadcrumbs current={title} />
+      <div className="mt-6">
+        <DraftNotice />
+      </div>
       <h1 className="mt-6 text-3xl font-semibold tracking-tight">{title}</h1>
       <div className="mt-8 space-y-8 leading-relaxed text-slate-700 dark:text-slate-300">
         {children}

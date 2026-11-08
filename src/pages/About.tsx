@@ -1,9 +1,14 @@
+import { Link } from 'react-router'
+import { Breadcrumbs } from '../components/seo/Breadcrumbs.tsx'
 import { siteConfig } from '../config/site.ts'
 
 export function About() {
   return (
     <article className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="text-3xl font-semibold tracking-tight">About {siteConfig.name}</h1>
+      <Breadcrumbs current="About" />
+      <h1 className="mt-6 text-3xl font-semibold tracking-tight">
+        About {siteConfig.name}
+      </h1>
       <div className="mt-6 space-y-4 leading-relaxed text-slate-700 dark:text-slate-300">
         <p>
           {siteConfig.name} version {siteConfig.version} is a free browser tool for
@@ -39,6 +44,16 @@ export function About() {
           process technical visitor information for hosting and security. Optional
           Cloudflare Web Analytics, when the owner turns it on, measures page traffic and
           does not receive image contents.
+        </p>
+        <p>
+          Questions about the site can go to the{' '}
+          <Link
+            className="font-medium text-blue-700 underline dark:text-blue-300"
+            to="/contact"
+          >
+            contact page
+          </Link>
+          .
         </p>
       </div>
     </article>

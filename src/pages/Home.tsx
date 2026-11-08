@@ -1,5 +1,7 @@
 import { Download, Image as ImageIcon, Lock, Shield } from 'lucide-react'
+import { Link } from 'react-router'
 import { ImageWorkspace } from '../components/image/ImageWorkspace.tsx'
+import { homeFaq } from '../config/seo.ts'
 
 const features = [
   {
@@ -54,6 +56,32 @@ export function Home() {
         >
           Upload Image
         </a>
+        <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm font-semibold">
+          <li>
+            <Link
+              className="text-blue-700 underline-offset-4 hover:underline dark:text-blue-300"
+              to="/resize"
+            >
+              Resize an image
+            </Link>
+          </li>
+          <li>
+            <Link
+              className="text-blue-700 underline-offset-4 hover:underline dark:text-blue-300"
+              to="/about"
+            >
+              How it works
+            </Link>
+          </li>
+          <li>
+            <Link
+              className="text-blue-700 underline-offset-4 hover:underline dark:text-blue-300"
+              to="/privacy"
+            >
+              Privacy Policy
+            </Link>
+          </li>
+        </ul>
       </section>
 
       <div className="mx-auto max-w-6xl px-4 pb-12">
@@ -90,6 +118,30 @@ export function Home() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section
+        aria-labelledby="common-questions"
+        className="border-t border-slate-200 dark:border-slate-800"
+      >
+        <div className="mx-auto max-w-6xl px-4 py-12">
+          <h2 id="common-questions" className="text-2xl font-semibold">
+            Common questions
+          </h2>
+          <dl className="mt-6 grid gap-4 md:grid-cols-2">
+            {homeFaq.map((item) => (
+              <div
+                key={item.question}
+                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+              >
+                <dt className="font-semibold">{item.question}</dt>
+                <dd className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                  {item.answer}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
       </section>
     </div>
   )
