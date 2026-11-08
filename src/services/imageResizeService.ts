@@ -139,7 +139,7 @@ export async function resizeImage(
       subjectContext.imageSmoothingEnabled = true
       subjectContext.imageSmoothingQuality = 'high'
       subjectContext.drawImage(scaled.bitmap, 0, 0, width, height)
-      composeBackground(context, subject, request.background, format === 'jpeg')
+      await composeBackground(context, subject, request.background, format === 'jpeg')
     }
   } catch (error) {
     if (error instanceof ImageProcessingError) throw error

@@ -51,6 +51,32 @@ describe('subjectAlpha', () => {
     expect(alpha[2 * 6 + 2]).toBe(255)
   })
 
+  it('removes a green backdrop and the white glow around the subject', () => {
+    const size = 220
+    const pixels = fill(size, size, (data, x, y) => {
+      const dx = x - (size - 1) / 2
+      const dy = y - (size - 1) / 2
+      const distance = Math.hypot(dx, dy)
+      if (distance <= 20) {
+        setPixel(data, size, x, y, [180, 80, 60, 255])
+        return
+      }
+      const glow = Math.min(1, Math.max(0, (170 - distance) / 150))
+      setPixel(data, size, x, y, [
+        Math.round(255 * glow + 20 * (1 - glow)),
+        Math.round(255 * glow + 170 * (1 - glow)),
+        Math.round(255 * glow + 50 * (1 - glow)),
+        255,
+      ])
+    })
+    const alpha = subjectAlpha(pixels, size, size)
+    const center = Math.floor(size / 2)
+    expect(alpha[2]).toBe(0)
+    expect(alpha[(center - 50) * size + center]).toBe(0)
+    expect(alpha[center * size + center]).toBe(255)
+    expect(pixels[(center * size + center) * 4]).toBe(180)
+  })
+
   it('uses a center cutout when the corners are not one color', () => {
     const pixels = fill(10, 10, (data, x, y) => {
       setPixel(data, 10, x, y, [(x * 25) % 255, (y * 40) % 255, 80, 255])
@@ -65,18 +91,18 @@ describe('backgroundKey', () => {
   it('changes when the scene, color, or light focus changes', () => {
     const base = {
       mode: 'scene' as const,
-      scene: 'studio' as const,
+      scene: 'beach' as const,
       color: '#ffffff',
       lightFocus: 0,
     }
-    expect(backgroundKey(base)).not.toBe(backgroundKey({ ...base, scene: 'ocean' }))
+    expect(backgroundKey(base)).not.toBe(backgroundKey({ ...base, scene: 'forest' }))
     expect(backgroundKey({ ...base, mode: 'color', color: 'red' })).toContain('#ffffff')
     expect(sanitizeColor('#AABBCC')).toBe('#aabbcc')
     expect(sanitizeColor('blue')).toBe('#ffffff')
     expect(clampLightFocus(140.6)).toBe(100)
     expect(clampLightFocus(-4)).toBe(0)
     expect(clampLightFocus(Number.NaN)).toBe(0)
-    expect(isBackgroundScene('ocean')).toBe(true)
+    expect(isBackgroundScene('forest')).toBe(true)
     expect(isBackgroundScene('space')).toBe(false)
   })
 })

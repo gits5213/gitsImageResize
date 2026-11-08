@@ -101,7 +101,7 @@ describe('useImageResize', () => {
       blob: new Blob(['jpeg']),
       maxBytes: null,
       compression: DEFAULT_COMPRESSION,
-      backgroundKey: 'original:studio:#ffffff:0',
+      backgroundKey: 'original:beach:#ffffff:0',
     } satisfies ResizedImage)
 
     await act(async () => {
@@ -139,7 +139,7 @@ describe('useImageResize', () => {
       blob: new Blob(['jpeg']),
       maxBytes: 500 * 1024,
       compression: DEFAULT_COMPRESSION,
-      backgroundKey: 'scene:ocean:#ffffff:25',
+      backgroundKey: 'scene:forest:#ffffff:25',
     } satisfies ResizedImage)
     const { result } = renderHook(() => useImageResize())
     const file = new File([Uint8Array.from([1])], 'vacation.jpg', { type: 'image/jpeg' })
@@ -152,7 +152,7 @@ describe('useImageResize', () => {
       result.current.changeMaxSizeUnit('kb')
       result.current.changeBackground({
         mode: 'scene',
-        scene: 'ocean',
+        scene: 'forest',
         color: '#ffffff',
         lightFocus: 25,
       })
@@ -170,7 +170,7 @@ describe('useImageResize', () => {
       compression: DEFAULT_COMPRESSION,
       background: {
         mode: 'scene',
-        scene: 'ocean',
+        scene: 'forest',
         color: '#ffffff',
         lightFocus: 25,
       },
@@ -190,7 +190,7 @@ describe('useImageResize', () => {
     act(() => {
       result.current.changeBackground({
         ...result.current.background,
-        scene: 'forest',
+        scene: 'lake',
       })
     })
     expect(result.current.previewStale).toBe(true)

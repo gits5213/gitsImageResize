@@ -45,7 +45,7 @@ export class ResizerPage {
   }
 
   async chooseBackground(id: string): Promise<void> {
-    await this.page.getByTestId(`background-${id}`).click()
+    await this.page.getByTestId('background-select').selectOption(id)
   }
 
   async setLightFocus(value: string): Promise<void> {
@@ -72,7 +72,9 @@ export class ResizerPage {
   }
 
   async resize(): Promise<void> {
-    await this.page.getByTestId('resize-button').click()
+    const button = this.page.getByTestId('resize-button')
+    await expect(button).toBeEnabled()
+    await button.click()
     await expect(this.page.getByTestId('resized-preview')).toBeVisible()
   }
 

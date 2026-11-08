@@ -55,15 +55,13 @@ test('TC35 a scenario replaces a plain background and keeps the subject', async 
   const resizer = new ResizerPage(page)
   await resizer.open()
   await resizer.upload(fixtures.subject)
-  await resizer.chooseBackground('sunset')
-  await expect(page.getByTestId('background-sunset')).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  )
+  await resizer.chooseBackground('beach')
+  await expect(page.getByTestId('background-select')).toHaveValue('beach')
   await resizer.resize()
   const corner = await resizer.sampleResized(2, 2)
   const center = await resizer.sampleResized(40, 30)
-  expect(corner[0]).toBeGreaterThan(corner[1])
+  const originalGreen = corner[0] < 50 && corner[1] > 140 && corner[2] < 80
+  expect(originalGreen).toBe(false)
   expect(center[0]).toBeGreaterThan(150)
   expect(center[0]).toBeGreaterThan(center[1] + 40)
 })
@@ -125,14 +123,14 @@ test('TC40 a JPG download is compressed below the original upload', async ({ pag
   expect(readFileSync(filePath ?? '').length).toBeLessThan(original)
 })
 
-test('TC39 changing the background blocks the previous download', async ({ page }) => {
+test('TC39 changing the background refreshes the download', async ({ page }) => {
   const resizer = new ResizerPage(page)
   await resizer.open()
   await resizer.upload(fixtures.subject)
-  await resizer.chooseBackground('studio')
-  await resizer.resize()
+  await resizer.chooseBackground('beach')
+  await expect(page.getByTestId('resized-preview')).toBeVisible()
   await expect(page.getByTestId('download-button')).toBeEnabled()
-  await resizer.chooseBackground('ocean')
-  await expect(page.getByTestId('download-button')).toBeDisabled()
-  await expect(page.getByText(/background you chose/i)).toBeVisible()
+  await resizer.chooseBackground('forest')
+  await expect(page.getByTestId('download-button')).toBeEnabled()
+  await expect(page.getByTestId('background-select')).toHaveValue('forest')
 })

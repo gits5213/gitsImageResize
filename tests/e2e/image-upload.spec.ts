@@ -6,12 +6,16 @@ import { ResizerPage } from './pages/resizer.page.ts'
 test('TC01 homepage loads', async ({ page }) => {
   await page.goto('/')
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Resize Images Online for Free' }),
+    page.getByRole('heading', {
+      level: 1,
+      name: 'Resize Images for Free. Pay It Forward.',
+    }),
   ).toBeVisible()
   await expect(page.getByTestId('dropzone')).toBeVisible()
   await expect(page.getByText('Drop an image here')).toBeVisible()
   await expect(page.getByTestId('max-file-size')).toBeVisible()
-  await expect(page.getByTestId('background-sunset')).toBeVisible()
+  await expect(page.getByTestId('background-select')).toBeVisible()
+  await expect(page.getByRole('option', { name: 'Beach' })).toHaveCount(1)
   await expect(page.getByTestId('light-focus')).toBeVisible()
 })
 

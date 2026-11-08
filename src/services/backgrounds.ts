@@ -1,15 +1,10 @@
 export const BACKGROUND_SCENES = [
-  { id: 'studio', label: 'Studio', swatch: 'radial-gradient(circle, #f8fafc, #94a3b8)' },
-  { id: 'daylight', label: 'Soft daylight', swatch: 'linear-gradient(#dbeafe, #fff7ed)' },
-  { id: 'sunset', label: 'Sunset', swatch: 'linear-gradient(#fdba74, #fb7185, #7c3aed)' },
-  { id: 'ocean', label: 'Ocean', swatch: 'linear-gradient(#7dd3fc, #1d4ed8)' },
-  { id: 'forest', label: 'Forest', swatch: 'linear-gradient(#d9f99d, #166534)' },
-  { id: 'city-night', label: 'City night', swatch: 'linear-gradient(#1e293b, #020617)' },
-  {
-    id: 'warm-room',
-    label: 'Warm room',
-    swatch: 'radial-gradient(circle, #ffedd5, #c2410c)',
-  },
+  { id: 'beach', label: 'Beach', file: 'backgrounds/beach.jpg' },
+  { id: 'forest', label: 'Forest', file: 'backgrounds/forest.jpg' },
+  { id: 'mountains', label: 'Mountains', file: 'backgrounds/mountains.jpg' },
+  { id: 'meadow', label: 'Meadow', file: 'backgrounds/meadow.jpg' },
+  { id: 'lake', label: 'Lake', file: 'backgrounds/lake.jpg' },
+  { id: 'desert', label: 'Desert', file: 'backgrounds/desert.jpg' },
 ] as const
 
 export const COLOR_SWATCHES = [
@@ -33,9 +28,36 @@ export interface BackgroundChoice {
 
 export const DEFAULT_BACKGROUND: BackgroundChoice = {
   mode: 'original',
-  scene: 'studio',
+  scene: 'beach',
   color: '#ffffff',
   lightFocus: 0,
+}
+
+export function backgroundFile(scene: BackgroundScene): string {
+  return (
+    BACKGROUND_SCENES.find((item) => item.id === scene)?.file ?? BACKGROUND_SCENES[0].file
+  )
+}
+
+export function backgroundImageUrl(file: string): string {
+  return `${import.meta.env.BASE_URL}${file}`
+}
+
+export function backgroundSelection(choice: BackgroundChoice): string {
+  return choice.mode === 'scene' ? choice.scene : choice.mode
+}
+
+export function backgroundFromSelection(
+  current: BackgroundChoice,
+  selection: string,
+): BackgroundChoice {
+  if (selection === 'original' || selection === 'color' || selection === 'transparent') {
+    return { ...current, mode: selection }
+  }
+  if (isBackgroundScene(selection)) {
+    return { ...current, mode: 'scene', scene: selection }
+  }
+  return current
 }
 
 export function isBackgroundScene(value: string): value is BackgroundScene {

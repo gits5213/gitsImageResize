@@ -2,137 +2,57 @@ import { ImageProcessingError } from './imageErrors.ts'
 import {
   type BackgroundChoice,
   type BackgroundScene,
+  backgroundFile,
+  backgroundImageUrl,
   sanitizeColor,
 } from './backgrounds.ts'
 import { subjectAlpha } from './backgroundMask.ts'
 
-function paintScene(
+const IMAGE_MESSAGE =
+  'This background image could not be loaded. Please try another background.'
+
+const sceneImages = new Map<string, Promise<HTMLImageElement>>()
+
+function loadSceneImage(scene: BackgroundScene): Promise<HTMLImageElement> {
+  const file = backgroundFile(scene)
+  const cached = sceneImages.get(file)
+  if (cached) return cached
+  const pending = new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image()
+    image.onload = () => {
+      if (image.naturalWidth < 1 || image.naturalHeight < 1) {
+        sceneImages.delete(file)
+        reject(new ImageProcessingError(IMAGE_MESSAGE))
+        return
+      }
+      resolve(image)
+    }
+    image.onerror = () => {
+      sceneImages.delete(file)
+      reject(new ImageProcessingError(IMAGE_MESSAGE))
+    }
+    image.src = backgroundImageUrl(file)
+  })
+  sceneImages.set(file, pending)
+  return pending
+}
+
+function drawCover(
   context: CanvasRenderingContext2D,
-  scene: BackgroundScene,
+  image: HTMLImageElement,
   width: number,
   height: number,
 ): void {
-  const sky = context.createLinearGradient(0, 0, 0, height)
-  if (scene === 'studio') {
-    const glow = context.createRadialGradient(
-      width / 2,
-      height * 0.42,
-      0,
-      width / 2,
-      height / 2,
-      Math.max(width, height) * 0.65,
-    )
-    glow.addColorStop(0, '#f8fafc')
-    glow.addColorStop(1, '#94a3b8')
-    context.fillStyle = glow
-    context.fillRect(0, 0, width, height)
-    return
-  }
-  if (scene === 'daylight') {
-    sky.addColorStop(0, '#dbeafe')
-    sky.addColorStop(0.72, '#fff7ed')
-    context.fillStyle = sky
-    context.fillRect(0, 0, width, height)
-    context.fillStyle = 'rgba(255, 244, 214, 0.95)'
-    context.beginPath()
-    context.arc(
-      width * 0.78,
-      height * 0.22,
-      Math.min(width, height) * 0.08,
-      0,
-      Math.PI * 2,
-    )
-    context.fill()
-    return
-  }
-  if (scene === 'sunset') {
-    sky.addColorStop(0, '#fb923c')
-    sky.addColorStop(0.46, '#fb7185')
-    sky.addColorStop(1, '#4c1d95')
-    context.fillStyle = sky
-    context.fillRect(0, 0, width, height)
-    context.fillStyle = 'rgba(255, 237, 213, 0.9)'
-    context.beginPath()
-    context.arc(width * 0.5, height * 0.62, Math.min(width, height) * 0.1, 0, Math.PI * 2)
-    context.fill()
-    return
-  }
-  if (scene === 'ocean') {
-    sky.addColorStop(0, '#bae6fd')
-    sky.addColorStop(0.42, '#38bdf8')
-    sky.addColorStop(1, '#1e3a8a')
-    context.fillStyle = sky
-    context.fillRect(0, 0, width, height)
-    context.strokeStyle = 'rgba(255,255,255,0.45)'
-    context.lineWidth = Math.max(2, height * 0.012)
-    for (const band of [0.58, 0.7, 0.82]) {
-      context.beginPath()
-      context.moveTo(0, height * band)
-      context.quadraticCurveTo(width * 0.5, height * (band - 0.04), width, height * band)
-      context.stroke()
-    }
-    return
-  }
-  if (scene === 'forest') {
-    sky.addColorStop(0, '#ecfccb')
-    sky.addColorStop(0.45, '#4ade80')
-    sky.addColorStop(1, '#14532d')
-    context.fillStyle = sky
-    context.fillRect(0, 0, width, height)
-    context.fillStyle = '#166534'
-    for (const [x, scale] of [
-      [0.18, 0.22],
-      [0.5, 0.3],
-      [0.82, 0.2],
-    ] as const) {
-      context.beginPath()
-      context.ellipse(
-        width * x,
-        height * 0.72,
-        width * scale * 0.45,
-        height * scale,
-        0,
-        0,
-        Math.PI * 2,
-      )
-      context.fill()
-    }
-    return
-  }
-  if (scene === 'city-night') {
-    sky.addColorStop(0, '#1e293b')
-    sky.addColorStop(1, '#020617')
-    context.fillStyle = sky
-    context.fillRect(0, 0, width, height)
-    context.fillStyle = 'rgba(250, 204, 21, 0.85)'
-    const columns = Math.max(3, Math.round(width / 48))
-    const rows = Math.max(2, Math.round(height / 64))
-    for (let column = 0; column < columns; column += 1) {
-      for (let row = 0; row < rows; row += 1) {
-        if ((column * 3 + row * 5) % 4 === 0) continue
-        context.fillRect(
-          width * 0.08 + column * ((width * 0.84) / columns),
-          height * 0.2 + row * ((height * 0.55) / rows),
-          Math.max(2, width / columns / 4),
-          Math.max(2, height / rows / 5),
-        )
-      }
-    }
-    return
-  }
-
-  const glow = context.createRadialGradient(
-    width / 2,
-    height * 0.4,
-    0,
-    width / 2,
-    height * 0.55,
-    Math.max(width, height) * 0.7,
+  const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight)
+  const drawWidth = image.naturalWidth * scale
+  const drawHeight = image.naturalHeight * scale
+  context.drawImage(
+    image,
+    (width - drawWidth) / 2,
+    (height - drawHeight) / 2,
+    drawWidth,
+    drawHeight,
   )
-  glow.addColorStop(0, '#ffedd5')
-  glow.addColorStop(1, '#c2410c')
-  context.fillStyle = glow
-  context.fillRect(0, 0, width, height)
 }
 
 function cutOutSubject(subject: HTMLCanvasElement): void {
@@ -197,12 +117,12 @@ export function paintLightFocus(
   context.restore()
 }
 
-export function composeBackground(
+export async function composeBackground(
   output: CanvasRenderingContext2D,
   subject: HTMLCanvasElement,
   choice: BackgroundChoice,
   flattenTransparent: boolean,
-): void {
+): Promise<void> {
   const { width, height } = subject
   output.clearRect(0, 0, width, height)
   if (choice.mode === 'original') {
@@ -222,7 +142,7 @@ export function composeBackground(
     output.fillStyle = sanitizeColor(choice.color)
     output.fillRect(0, 0, width, height)
   } else if (choice.mode === 'scene') {
-    paintScene(output, choice.scene, width, height)
+    drawCover(output, await loadSceneImage(choice.scene), width, height)
   }
 
   cutOutSubject(subject)

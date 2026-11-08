@@ -37,7 +37,7 @@ export function Home() {
           Private, in your browser
         </p>
         <h1 className="mt-3 max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-          Resize Images Online for Free
+          Resize Images for Free. Pay It Forward.
         </h1>
         <p className="mt-4 max-w-2xl text-lg text-slate-600 dark:text-slate-300">
           Resize JPG, PNG, GIF, WebP, BMP, AVIF, ICO, SVG, TIFF, and HEIC images in your

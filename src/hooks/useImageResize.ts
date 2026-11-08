@@ -51,6 +51,7 @@ export function useImageResize() {
   const sourceUrlRef = useRef<string | null>(null)
   const resizedUrlRef = useRef<string | null>(null)
   const requestId = useRef(0)
+  const resizeGeneration = useRef(0)
   const limits = useMemo(() => detectCanvasLimits(), [])
 
   const releaseResources = () => {
@@ -217,7 +218,7 @@ export function useImageResize() {
 
   const resize = async () => {
     const bitmap = bitmapRef.current
-    if (!source || !bitmap || phase !== 'idle') return
+    if (!source || !bitmap) return
     const width = parseDimensionInput(widthInput)
     const height = parseDimensionInput(heightInput)
     if (!width.ok || !height.ok) {
@@ -234,12 +235,16 @@ export function useImageResize() {
       return
     }
 
+    const generation = ++resizeGeneration.current
     const activeRequest = requestId.current
     setPhase('resizing')
     setError(null)
     await new Promise<void>((resolve) => {
       window.setTimeout(resolve, 0)
     })
+    const current =
+      generation === resizeGeneration.current && activeRequest === requestId.current
+    if (!current) return
     try {
       const result = await resizeImage(bitmap, {
         width: width.value,
@@ -250,7 +255,10 @@ export function useImageResize() {
         compression,
         background,
       })
-      if (activeRequest !== requestId.current) {
+      if (
+        generation !== resizeGeneration.current ||
+        activeRequest !== requestId.current
+      ) {
         revokeObjectUrl(result.previewUrl)
         return
       }
@@ -268,10 +276,16 @@ export function useImageResize() {
         `Resized image ready at ${result.width} by ${result.height} pixels.${sizeNote}`,
       )
     } catch (caught) {
-      if (activeRequest !== requestId.current) return
+      if (generation !== resizeGeneration.current || activeRequest !== requestId.current)
+        return
       setError(toUserMessage(caught))
     } finally {
-      if (activeRequest === requestId.current) setPhase('idle')
+      if (
+        generation === resizeGeneration.current &&
+        activeRequest === requestId.current
+      ) {
+        setPhase('idle')
+      }
     }
   }
 

@@ -15,11 +15,11 @@ describe('BackgroundControls', () => {
       />,
     )
 
-    await userEvent.click(screen.getByTestId('background-sunset'))
+    await userEvent.selectOptions(screen.getByTestId('background-select'), 'beach')
     expect(onChange).toHaveBeenCalledWith({
       ...DEFAULT_BACKGROUND,
       mode: 'scene',
-      scene: 'sunset',
+      scene: 'beach',
     })
 
     rerender(
@@ -36,7 +36,7 @@ describe('BackgroundControls', () => {
       color: '#2563eb',
     })
 
-    await userEvent.click(screen.getByTestId('background-transparent'))
+    await userEvent.selectOptions(screen.getByTestId('background-select'), 'transparent')
     expect(onChange).toHaveBeenLastCalledWith({
       ...DEFAULT_BACKGROUND,
       mode: 'transparent',
@@ -45,7 +45,7 @@ describe('BackgroundControls', () => {
 
   it('disables the choices while the editor is busy', () => {
     render(<BackgroundControls value={DEFAULT_BACKGROUND} disabled onChange={vi.fn()} />)
-    expect(screen.getByTestId('background-ocean')).toBeDisabled()
+    expect(screen.getByTestId('background-select')).toBeDisabled()
     expect(screen.getByTestId('light-focus')).toBeDisabled()
   })
 })

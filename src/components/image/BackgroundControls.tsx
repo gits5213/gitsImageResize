@@ -2,7 +2,10 @@ import {
   BACKGROUND_SCENES,
   COLOR_SWATCHES,
   type BackgroundChoice,
-  type BackgroundScene,
+  backgroundFile,
+  backgroundFromSelection,
+  backgroundImageUrl,
+  backgroundSelection,
   sanitizeColor,
 } from '../../services/backgrounds.ts'
 
@@ -12,82 +15,50 @@ interface BackgroundControlsProps {
   onChange: (value: BackgroundChoice) => void
 }
 
-const modeClass = (selected: boolean) =>
-  `min-h-11 rounded-xl border px-3 text-sm font-medium ${
-    selected
-      ? 'border-blue-600 bg-blue-50 text-blue-950 dark:border-blue-400 dark:bg-blue-950/50 dark:text-blue-50'
-      : 'border-slate-300 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100'
-  }`
-
 export function BackgroundControls({
   value,
   disabled,
   onChange,
 }: BackgroundControlsProps) {
-  const chooseScene = (scene: BackgroundScene) => {
-    onChange({ ...value, mode: 'scene', scene })
-  }
+  const selectedScene = BACKGROUND_SCENES.find((scene) => scene.id === value.scene)
 
   return (
-    <fieldset className="space-y-4" disabled={disabled}>
-      <legend className="text-sm font-medium text-slate-800 dark:text-slate-200">
-        Background
-      </legend>
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          data-testid="background-original"
-          className={modeClass(value.mode === 'original')}
-          aria-pressed={value.mode === 'original'}
-          onClick={() => onChange({ ...value, mode: 'original' })}
+    <div className="space-y-4">
+      <div className="max-w-sm">
+        <label
+          htmlFor="background-select"
+          className="text-sm font-medium text-slate-800 dark:text-slate-200"
         >
-          Original
-        </button>
-        <button
-          type="button"
-          data-testid="background-color"
-          className={modeClass(value.mode === 'color')}
-          aria-pressed={value.mode === 'color'}
-          onClick={() => onChange({ ...value, mode: 'color' })}
+          Background
+        </label>
+        <select
+          id="background-select"
+          data-testid="background-select"
+          disabled={disabled}
+          className="mt-1 w-full min-h-11 cursor-pointer rounded-xl border border-slate-300 bg-white px-3 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950"
+          value={backgroundSelection(value)}
+          onChange={(event) =>
+            onChange(backgroundFromSelection(value, event.target.value))
+          }
         >
-          Color
-        </button>
-        <button
-          type="button"
-          data-testid="background-transparent"
-          className={modeClass(value.mode === 'transparent')}
-          aria-pressed={value.mode === 'transparent'}
-          onClick={() => onChange({ ...value, mode: 'transparent' })}
-        >
-          Transparent
-        </button>
-      </div>
-
-      <div
-        className="flex flex-wrap gap-2"
-        role="group"
-        aria-label="Scenario backgrounds"
-      >
-        {BACKGROUND_SCENES.map((scene) => {
-          const selected = value.mode === 'scene' && value.scene === scene.id
-          return (
-            <button
-              key={scene.id}
-              type="button"
-              data-testid={`background-${scene.id}`}
-              aria-pressed={selected}
-              className={`${modeClass(selected)} inline-flex items-center gap-2`}
-              onClick={() => chooseScene(scene.id)}
-            >
-              <span
-                aria-hidden="true"
-                className="size-4 rounded-full border border-black/10"
-                style={{ background: scene.swatch }}
-              />
-              {scene.label}
-            </button>
-          )
-        })}
+          <option value="original">Original</option>
+          <optgroup label="Natural backgrounds">
+            {BACKGROUND_SCENES.map((scene) => (
+              <option key={scene.id} value={scene.id}>
+                {scene.label}
+              </option>
+            ))}
+          </optgroup>
+          <option value="color">Solid color</option>
+          <option value="transparent">Transparent</option>
+        </select>
+        {value.mode === 'scene' && selectedScene ? (
+          <img
+            src={backgroundImageUrl(backgroundFile(selectedScene.id))}
+            alt=""
+            className="mt-3 h-28 w-full rounded-xl object-cover"
+          />
+        ) : null}
       </div>
 
       {value.mode === 'color' ? (
@@ -103,14 +74,16 @@ export function BackgroundControls({
             onChange={(event) =>
               onChange({ ...value, color: sanitizeColor(event.target.value) })
             }
-            className="h-11 w-14 cursor-pointer rounded-lg border border-slate-300 bg-white p-1 dark:border-slate-700 dark:bg-slate-950"
+            disabled={disabled}
+            className="h-11 w-14 cursor-pointer rounded-lg border border-slate-300 bg-white p-1 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950"
           />
           {COLOR_SWATCHES.map((swatch) => (
             <button
               key={swatch}
               type="button"
               aria-label={`Use color ${swatch}`}
-              className="size-8 rounded-full border border-slate-300 dark:border-slate-600"
+              disabled={disabled}
+              className="size-8 rounded-full border border-slate-300 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600"
               style={{ backgroundColor: swatch }}
               onClick={() => onChange({ ...value, mode: 'color', color: swatch })}
             />
@@ -130,18 +103,19 @@ export function BackgroundControls({
           max={100}
           step={1}
           value={value.lightFocus}
+          disabled={disabled}
           onChange={(event) =>
             onChange({ ...value, lightFocus: Number(event.target.value) })
           }
-          className="mt-2 w-full"
+          className="mt-2 w-full disabled:cursor-not-allowed disabled:opacity-50"
         />
       </div>
 
       <p className="text-sm text-slate-600 dark:text-slate-300">
-        Scenario and color backgrounds replace a plain backdrop, or keep a soft center
-        when the photo is busy. Light focus brightens the middle and darkens the edges.
-        The image stays in this browser. Transparent areas become white in a JPG download.
+        Choose a background and the preview updates. The backdrop, including a soft glow,
+        is replaced. The person or subject keeps its original pixels. Light focus
+        brightens the middle and darkens the edges. The image stays in this browser.
       </p>
-    </fieldset>
+    </div>
   )
 }

@@ -1,4 +1,5 @@
 import { AlertTriangle, Download, RotateCcw, Trash2 } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 import { useImageResize } from '../../hooks/useImageResize.ts'
 import {
   formatDimensions,
@@ -24,6 +25,20 @@ export function ImageWorkspace() {
   const editor = useImageResize()
   const busy = editor.phase !== 'idle'
   const alertMessage = editor.error ?? editor.sizeError
+  const selectionKey = `${editor.background.mode}:${editor.background.scene}:${editor.background.color}`
+  const appliedSelection = useRef<string | null>(null)
+  const resizeRef = useRef(editor.resize)
+  resizeRef.current = editor.resize
+
+  useEffect(() => {
+    if (!editor.source) {
+      appliedSelection.current = selectionKey
+      return
+    }
+    if (appliedSelection.current === selectionKey) return
+    appliedSelection.current = selectionKey
+    void resizeRef.current()
+  }, [editor.source, selectionKey])
 
   return (
     <section id="workspace" aria-busy={busy} className="space-y-6">
@@ -141,7 +156,7 @@ export function ImageWorkspace() {
         <div className="mt-4">
           <BackgroundControls
             value={editor.background}
-            disabled={!editor.source || busy}
+            disabled={busy}
             onChange={editor.changeBackground}
           />
         </div>
