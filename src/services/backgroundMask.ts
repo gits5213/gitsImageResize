@@ -10,6 +10,13 @@ function channelDistance(
   return Math.hypot(red, green, blue)
 }
 
+function colorDistance(
+  left: readonly [number, number, number],
+  right: readonly [number, number, number],
+): number {
+  return Math.hypot(left[0] - right[0], left[1] - right[1], left[2] - right[2])
+}
+
 function cornerColors(
   pixels: Uint8ClampedArray,
   width: number,
@@ -31,10 +38,7 @@ function farthest(colors: Array<[number, number, number]>): number {
   let spread = 0
   for (let left = 0; left < colors.length; left += 1) {
     for (let right = left + 1; right < colors.length; right += 1) {
-      const red = colors[left][0] - colors[right][0]
-      const green = colors[left][1] - colors[right][1]
-      const blue = colors[left][2] - colors[right][2]
-      spread = Math.max(spread, Math.hypot(red, green, blue))
+      spread = Math.max(spread, colorDistance(colors[left], colors[right]))
     }
   }
   return spread
@@ -42,6 +46,132 @@ function farthest(colors: Array<[number, number, number]>): number {
 
 const SMOOTH_EDGE_LIMIT = 16
 const SMALL_ISLAND_PIXELS = 64
+const BACKDROP_MATCH = 48
+const KEY_DISTANCE = 68
+const SPILL_DISTANCE = 88
+
+function medianChannel(values: number[]): number {
+  const sorted = values.slice().sort((left, right) => left - right)
+  return sorted[Math.floor(sorted.length / 2)] ?? 0
+}
+
+function medianColor(colors: Array<[number, number, number]>): [number, number, number] {
+  return [
+    medianChannel(colors.map((color) => color[0])),
+    medianChannel(colors.map((color) => color[1])),
+    medianChannel(colors.map((color) => color[2])),
+  ]
+}
+
+/** How strongly one channel leads. Neutral backgrounds such as white or gray return null. */
+function dominantChannel(color: readonly [number, number, number]): number | null {
+  let channel = 0
+  if (color[1] > color[channel]) channel = 1
+  if (color[2] > color[channel]) channel = 2
+  const rest = Math.max(color[(channel + 1) % 3], color[(channel + 2) % 3])
+  if (color[channel] - rest < 28) return null
+  return channel
+}
+
+function readColor(pixels: Uint8ClampedArray, index: number): [number, number, number] {
+  const offset = index * 4
+  return [pixels[offset], pixels[offset + 1], pixels[offset + 2]]
+}
+
+function borderColors(
+  pixels: Uint8ClampedArray,
+  width: number,
+  height: number,
+): Array<Array<[number, number, number]>> {
+  const inset = 2
+  const sides: Array<Array<[number, number, number]>> = [[], [], [], []]
+  const push = (side: number, x: number, y: number) => {
+    sides[side].push(readColor(pixels, y * width + x))
+  }
+  for (let x = inset; x < width - inset; x += 2) {
+    push(0, x, inset)
+    push(1, x, height - 1 - inset)
+  }
+  for (let y = inset; y < height - inset; y += 2) {
+    push(2, inset, y)
+    push(3, width - 1 - inset, y)
+  }
+  return sides
+}
+
+/**
+ * A backdrop color shared by most of the border. Subject pixels that touch the
+ * border, such as jeans along the bottom, do not have to match.
+ */
+function uniformBackdrop(
+  pixels: Uint8ClampedArray,
+  width: number,
+  height: number,
+): [number, number, number] | null {
+  if (width < 8 || height < 8) return null
+  const sides = borderColors(pixels, width, height)
+  const all = sides.flat()
+  if (all.length < 16) return null
+  let best: [number, number, number] | null = null
+  let bestRate = 0
+  const candidates = [medianColor(all), ...sides.map((side) => medianColor(side))]
+  for (const candidate of candidates) {
+    if (dominantChannel(candidate) === null) continue
+    let matched = 0
+    for (const color of all) {
+      if (colorDistance(color, candidate) <= BACKDROP_MATCH) matched += 1
+    }
+    const rate = matched / all.length
+    if (rate > bestRate) {
+      bestRate = rate
+      best = candidate
+    }
+  }
+  if (!best || bestRate < 0.45) return null
+  return best
+}
+
+function sharesBackdropHue(
+  pixels: Uint8ClampedArray,
+  index: number,
+  channel: number,
+): boolean {
+  const color = readColor(pixels, index)
+  const rest = Math.max(color[(channel + 1) % 3], color[(channel + 2) % 3])
+  return color[channel] >= rest + 22
+}
+
+/**
+ * Removes a uniform colored backdrop everywhere, including pockets left inside
+ * the subject. Clothing is kept unless it is that same color.
+ */
+function chromaBackdrop(
+  pixels: Uint8ClampedArray,
+  width: number,
+  height: number,
+): Uint8Array | null {
+  const backdrop = uniformBackdrop(pixels, width, height)
+  if (!backdrop) return null
+  const channel = dominantChannel(backdrop)
+  if (channel === null) return null
+  const count = width * height
+  const alpha = new Uint8Array(count)
+  let removed = 0
+  for (let index = 0; index < count; index += 1) {
+    const source = pixels[index * 4 + 3]
+    const distance = channelDistance(pixels, index, backdrop)
+    const spill = distance <= SPILL_DISTANCE && sharesBackdropHue(pixels, index, channel)
+    if (distance <= KEY_DISTANCE || spill) {
+      alpha[index] = 0
+      removed += 1
+      continue
+    }
+    if (distance >= KEY_DISTANCE + 18) alpha[index] = source
+    else alpha[index] = Math.round(source * ((distance - KEY_DISTANCE) / 18))
+  }
+  if (removed < count * 0.05 || removed > count * 0.97) return null
+  return alpha
+}
 
 function edgeMagnitude(
   pixels: Uint8ClampedArray,
@@ -79,7 +209,7 @@ function edgeMagnitude(
   return edge
 }
 
-/** Removes a smooth backdrop, including a soft glow, that touches the image border. The subject stays opaque. */
+/** Removes a smooth backdrop that touches the image border. Used when the border is not one color. */
 function smoothBackdrop(
   pixels: Uint8ClampedArray,
   width: number,
@@ -202,7 +332,7 @@ function ellipseAlpha(
   return alpha
 }
 
-/** Alpha to keep for each pixel. Existing transparency is preserved. A smooth backdrop is removed. The subject pixels stay unchanged. */
+/** Alpha to keep for each pixel. Existing transparency is preserved. A uniform backdrop is removed. Subject pixels stay unchanged. */
 export function subjectAlpha(
   pixels: Uint8ClampedArray,
   width: number,
@@ -223,6 +353,9 @@ export function subjectAlpha(
     for (let index = 0; index < count; index += 1) alpha[index] = pixels[index * 4 + 3]
     return alpha
   }
+
+  const keyed = chromaBackdrop(pixels, width, height)
+  if (keyed) return keyed
 
   const backdrop = smoothBackdrop(pixels, width, height)
   if (backdrop) {

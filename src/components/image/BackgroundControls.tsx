@@ -1,4 +1,5 @@
 import {
+  BACKGROUND_GROUPS,
   BACKGROUND_SCENES,
   COLOR_SWATCHES,
   type BackgroundChoice,
@@ -42,13 +43,17 @@ export function BackgroundControls({
           }
         >
           <option value="original">Original</option>
-          <optgroup label="Natural backgrounds">
-            {BACKGROUND_SCENES.map((scene) => (
-              <option key={scene.id} value={scene.id}>
-                {scene.label}
-              </option>
-            ))}
-          </optgroup>
+          {BACKGROUND_GROUPS.map((group) => (
+            <optgroup key={group.id} label={group.label}>
+              {BACKGROUND_SCENES.filter((scene) => scene.group === group.id).map(
+                (scene) => (
+                  <option key={scene.id} value={scene.id}>
+                    {scene.label}
+                  </option>
+                ),
+              )}
+            </optgroup>
+          ))}
           <option value="color">Solid color</option>
           <option value="transparent">Transparent</option>
         </select>

@@ -72,9 +72,71 @@ describe('subjectAlpha', () => {
     const alpha = subjectAlpha(pixels, size, size)
     const center = Math.floor(size / 2)
     expect(alpha[2]).toBe(0)
-    expect(alpha[(center - 50) * size + center]).toBe(0)
+    expect(alpha[(center - 100) * size + center]).toBe(0)
     expect(alpha[center * size + center]).toBe(255)
     expect(pixels[(center * size + center) * 4]).toBe(180)
+  })
+
+  it('removes a colored backdrop everywhere and keeps other clothing', () => {
+    const width = 80
+    const height = 90
+    const pixels = fill(width, height, (data, x, y) => {
+      const jeans = y >= 68
+      const shirt = x >= 18 && x <= 62 && y >= 24 && y < 68
+      const pocket = x >= 40 && x <= 52 && y >= 36 && y <= 48
+      if (jeans) setPixel(data, width, x, y, [20, 45, 140, 255])
+      else if (pocket) setPixel(data, width, x, y, [30, 190, 50, 255])
+      else if (shirt) setPixel(data, width, x, y, [235, 235, 235, 255])
+      else setPixel(data, width, x, y, [40, 200, 55, 255])
+    })
+    const alpha = subjectAlpha(pixels, width, height)
+    expect(alpha[4 * width + 4]).toBe(0)
+    expect(alpha[40 * width + 30]).toBe(255)
+    expect(pixels[(40 * width + 30) * 4]).toBe(235)
+    expect(alpha[42 * width + 46]).toBe(0)
+    expect(alpha[78 * width + 40]).toBe(255)
+    expect(pixels[(78 * width + 40) * 4 + 2]).toBe(140)
+  })
+
+  it('removes a blue backdrop the same way as a green one', () => {
+    const pixels = fill(40, 40, (data, x, y) => {
+      const subject = x >= 12 && x <= 28 && y >= 10 && y <= 30
+      setPixel(data, 40, x, y, subject ? [230, 200, 170, 255] : [30, 70, 210, 255])
+    })
+    const alpha = subjectAlpha(pixels, 40, 40)
+    expect(alpha[0]).toBe(0)
+    expect(alpha[20 * 40 + 20]).toBe(255)
+    expect(pixels[(20 * 40 + 20) * 4]).toBe(230)
+  })
+
+  it('keeps a shirt that fades into the backdrop color', () => {
+    const width = 90
+    const height = 120
+    const pixels = fill(width, height, (data, x, y) => {
+      const shirt = x >= 24 && x <= 65 && y >= 28
+      if (!shirt || y > 100) {
+        setPixel(data, width, x, y, [20, 170, 40, 255])
+        return
+      }
+      if (y === 46) {
+        setPixel(data, width, x, y, [30, 30, 30, 255])
+        return
+      }
+      const fade = Math.min(1, Math.max(0, (y - 50) / 46))
+      setPixel(data, width, x, y, [
+        Math.round(230 * (1 - fade) + 20 * fade),
+        Math.round(230 * (1 - fade) + 170 * fade),
+        Math.round(230 * (1 - fade) + 40 * fade),
+        255,
+      ])
+    })
+    const alpha = subjectAlpha(pixels, width, height)
+    expect(alpha[0]).toBe(0)
+    expect(alpha[40 * width + 44]).toBe(255)
+    expect(alpha[58 * width + 44]).toBe(255)
+    expect(pixels[(58 * width + 44) * 4]).toBeGreaterThan(170)
+    expect(alpha[96 * width + 44]).toBe(0)
+    expect(alpha[40 * width + 8]).toBe(0)
   })
 
   it('uses a center cutout when the corners are not one color', () => {

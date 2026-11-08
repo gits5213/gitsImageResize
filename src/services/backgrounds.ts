@@ -1,10 +1,95 @@
+export const BACKGROUND_GROUPS = [
+  { id: 'corporate', label: 'Corporate office' },
+  { id: 'home', label: 'Home' },
+  { id: 'nature', label: 'Nature' },
+  { id: 'professional', label: 'Professional' },
+  { id: 'blurry', label: 'Blurry' },
+] as const
+
 export const BACKGROUND_SCENES = [
-  { id: 'beach', label: 'Beach', file: 'backgrounds/beach.jpg' },
-  { id: 'forest', label: 'Forest', file: 'backgrounds/forest.jpg' },
-  { id: 'mountains', label: 'Mountains', file: 'backgrounds/mountains.jpg' },
-  { id: 'meadow', label: 'Meadow', file: 'backgrounds/meadow.jpg' },
-  { id: 'lake', label: 'Lake', file: 'backgrounds/lake.jpg' },
-  { id: 'desert', label: 'Desert', file: 'backgrounds/desert.jpg' },
+  {
+    id: 'office-open',
+    label: 'Open office',
+    file: 'backgrounds/office-open.jpg',
+    group: 'corporate',
+  },
+  {
+    id: 'office-meeting',
+    label: 'Meeting room',
+    file: 'backgrounds/office-meeting.jpg',
+    group: 'corporate',
+  },
+  {
+    id: 'office-reception',
+    label: 'Reception',
+    file: 'backgrounds/office-reception.jpg',
+    group: 'corporate',
+  },
+  {
+    id: 'home-living',
+    label: 'Living room',
+    file: 'backgrounds/home-living.jpg',
+    group: 'home',
+  },
+  {
+    id: 'home-kitchen',
+    label: 'Kitchen',
+    file: 'backgrounds/home-kitchen.jpg',
+    group: 'home',
+  },
+  {
+    id: 'home-bedroom',
+    label: 'Bedroom',
+    file: 'backgrounds/home-bedroom.jpg',
+    group: 'home',
+  },
+  { id: 'beach', label: 'Beach', file: 'backgrounds/beach.jpg', group: 'nature' },
+  { id: 'forest', label: 'Forest', file: 'backgrounds/forest.jpg', group: 'nature' },
+  {
+    id: 'mountains',
+    label: 'Mountains',
+    file: 'backgrounds/mountains.jpg',
+    group: 'nature',
+  },
+  { id: 'meadow', label: 'Meadow', file: 'backgrounds/meadow.jpg', group: 'nature' },
+  { id: 'lake', label: 'Lake', file: 'backgrounds/lake.jpg', group: 'nature' },
+  { id: 'desert', label: 'Desert', file: 'backgrounds/desert.jpg', group: 'nature' },
+  {
+    id: 'pro-studio',
+    label: 'Portrait studio',
+    file: 'backgrounds/pro-studio.jpg',
+    group: 'professional',
+  },
+  {
+    id: 'pro-skyline',
+    label: 'City skyline',
+    file: 'backgrounds/pro-skyline.jpg',
+    group: 'professional',
+  },
+  {
+    id: 'pro-stage',
+    label: 'Conference stage',
+    file: 'backgrounds/pro-stage.jpg',
+    group: 'professional',
+  },
+  {
+    id: 'blur-office',
+    label: 'Soft office',
+    file: 'backgrounds/blur-office.jpg',
+    group: 'blurry',
+  },
+  {
+    id: 'blur-city',
+    label: 'City bokeh',
+    file: 'backgrounds/blur-city.jpg',
+    group: 'blurry',
+  },
+  {
+    id: 'blur-nature',
+    label: 'Soft greenery',
+    file: 'backgrounds/blur-nature.jpg',
+    group: 'blurry',
+  },
 ] as const
 
 export const COLOR_SWATCHES = [
