@@ -24,13 +24,16 @@ test('TC26 footer links open the legal pages', async ({ page }) => {
     'href',
     'https://github.com/gits5213/gitsImageResize',
   )
+  await expect(footer.getByRole('link', { name: 'Contact' })).toHaveAttribute(
+    'href',
+    'https://mdszaman.com/contact/',
+  )
 
   for (const [path, heading] of [
     ['/privacy', 'Privacy Policy'],
     ['/terms', 'Terms of Use'],
     ['/security', 'Security & Privacy'],
     ['/disclaimer', 'Disclaimer'],
-    ['/contact', 'Contact'],
   ] as const) {
     await footer.getByRole('link', { name: heading }).click()
     await expect(page).toHaveURL(new RegExp(`${path}$`))

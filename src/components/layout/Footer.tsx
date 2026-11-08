@@ -1,13 +1,15 @@
 import { NavLink } from 'react-router'
 import { safeGithubUrl, siteConfig } from '../../config/site.ts'
+import { VisitorCount } from './VisitorCount.tsx'
 
 const links = [
   { to: '/privacy', label: 'Privacy Policy' },
   { to: '/terms', label: 'Terms of Use' },
   { to: '/security', label: 'Security & Privacy' },
   { to: '/disclaimer', label: 'Disclaimer' },
-  { to: '/contact', label: 'Contact' },
 ]
+
+const contactUrl = 'https://mdszaman.com/contact/'
 
 export function Footer() {
   const githubUrl = safeGithubUrl(siteConfig.githubRepoUrl)
@@ -19,16 +21,6 @@ export function Footer() {
         <div>
           <p className="font-semibold text-slate-900 dark:text-white">
             {siteConfig.companyName}
-          </p>
-          <p className="mt-1">
-            <a
-              href={siteConfig.companyUrl}
-              className="text-sm text-blue-700 underline-offset-4 hover:underline dark:text-blue-300"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              gitsuniversity.org
-            </a>
           </p>
           <p className="mt-1 max-w-sm text-sm text-slate-600 dark:text-slate-300">
             Resize images in your browser. Version {siteConfig.version} does not upload
@@ -48,6 +40,12 @@ export function Footer() {
               {link.label}
             </NavLink>
           ))}
+          <a
+            href={contactUrl}
+            className="text-slate-600 underline-offset-4 hover:underline dark:text-slate-300"
+          >
+            Contact
+          </a>
           {githubUrl ? (
             <a
               href={githubUrl}
@@ -68,9 +66,12 @@ export function Footer() {
         </nav>
       </div>
       <div className="border-t border-slate-200 dark:border-slate-800">
-        <p className="mx-auto max-w-6xl px-4 py-4 text-sm text-slate-600 dark:text-slate-300">
-          © {year} {siteConfig.companyLegalName} All rights reserved.
-        </p>
+        <div className="mx-auto flex max-w-6xl flex-col items-start gap-3 px-4 py-4 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between dark:text-slate-300">
+          <p>
+            © {year} {siteConfig.companyLegalName} All rights reserved.
+          </p>
+          <VisitorCount />
+        </div>
       </div>
     </footer>
   )

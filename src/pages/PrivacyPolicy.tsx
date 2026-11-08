@@ -72,10 +72,11 @@ export function PrivacyPolicy() {
         <p>
           Cloudflare Web Analytics is designed to report aggregated traffic in a private
           dashboard for the account owner. The dashboard is not embedded on this website.
-          This integration does not send uploaded images, image contents, filenames,
-          dimensions, or downloaded files. It is not an advertising cookie, a behavioral
-          advertising profile, or a custom personal identifier created by this
-          application.
+          The footer shows a separate public visit total. That request sends only the
+          counter name, not images, filenames, or dimensions. This integration does not
+          send uploaded images, image contents, filenames, dimensions, or downloaded
+          files. It is not an advertising cookie, a behavioral advertising profile, or a
+          custom personal identifier created by this application.
         </p>
         <p>
           Metrics the owner can review in Cloudflare's dashboard, when analytics is

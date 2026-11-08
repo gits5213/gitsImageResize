@@ -9,7 +9,12 @@ function watchRequests(page: import('@playwright/test').Page) {
     const url = new URL(request.url())
     if (url.protocol === 'blob:' || url.protocol === 'data:') return
     const hostname = url.hostname
-    if (hostname !== '127.0.0.1' && hostname !== 'localhost') external.push(request.url())
+    if (
+      hostname !== '127.0.0.1' &&
+      hostname !== 'localhost' &&
+      hostname !== 'abacus.jasoncameron.dev'
+    )
+      external.push(request.url())
     if (request.method() !== 'GET' && request.method() !== 'HEAD')
       nonGet.push(request.url())
     const body = request.postData() ?? ''

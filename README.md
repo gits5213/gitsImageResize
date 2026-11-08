@@ -136,7 +136,7 @@ Later updates deploy when you push to `main` or `master`.
 1. In Cloudflare, add the site to Web Analytics and copy the site token. Cloudflare documents this at [Web Analytics](https://developers.cloudflare.com/web-analytics/).
 2. Set `VITE_ANALYTICS_ENABLED=true` and `VITE_CF_BEACON_TOKEN` to that public token.
 3. Rebuild. The page loads `https://static.cloudflareinsights.com/beacon.min.js` only when both values are present.
-4. Use the Cloudflare dashboard for page views, visits, date ranges, countries, top pages, and referrers. Visits are Cloudflare’s privacy-preserving count, not a list of identified people. The dashboard is not embedded on this site, and visitor totals are not shown publicly.
+4. Use the Cloudflare dashboard for page views, visits, date ranges, countries, top pages, and referrers. Visits are Cloudflare’s privacy-preserving count, not a list of identified people. That dashboard is not embedded on this site. The footer shows a separate public visit total.
 
 With analytics left off, the beacon is not added and resizing still works. The beacon is not given images, filenames, dimensions, or downloads. This app does not add advertising cookies or its own user identifiers.
 

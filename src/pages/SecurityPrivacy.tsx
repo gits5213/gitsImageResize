@@ -51,7 +51,8 @@ export function SecurityPrivacy() {
           If the owner enables Cloudflare Web Analytics, Cloudflare receives website usage
           information such as page views and approximate visits. The beacon is omitted
           when analytics is not configured. The analytics dashboard stays in the owner's
-          Cloudflare account and is not shown on this site.
+          Cloudflare account and is not shown on this site. The footer visit total is a
+          separate public counter and does not include image contents.
         </p>
       </LegalSection>
 

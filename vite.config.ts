@@ -13,7 +13,7 @@ const contentSecurityPolicy = [
   "font-src 'self'",
   "style-src 'self' 'unsafe-inline'",
   "script-src 'self' https://static.cloudflareinsights.com",
-  "connect-src 'self' https://cloudflareinsights.com",
+  "connect-src 'self' https://cloudflareinsights.com https://abacus.jasoncameron.dev",
   "worker-src 'self' blob:",
   "form-action 'none'",
 ].join('; ')
