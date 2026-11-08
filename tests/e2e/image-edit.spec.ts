@@ -44,7 +44,9 @@ test('TC34 changing the maximum size blocks the previous download', async ({ pag
   await expect(page.getByTestId('download-button')).toBeEnabled()
   await resizer.setMaxFileSize('20')
   await expect(page.getByTestId('download-button')).toBeDisabled()
-  await expect(page.getByText(/maximum size, and background you chose/i)).toBeVisible()
+  await expect(
+    page.getByText(/maximum size, compression, and background you chose/i),
+  ).toBeVisible()
 })
 
 test('TC35 a scenario replaces a plain background and keeps the subject', async ({
@@ -107,6 +109,20 @@ test('TC38 light focus brightens the center and darkens the edges', async ({ pag
   const cornerLight = corner[0] + corner[1] + corner[2]
   const centerLight = center[0] + center[1] + center[2]
   expect(centerLight).toBeGreaterThan(cornerLight + 30)
+})
+
+test('TC40 a JPG download is compressed below the original upload', async ({ page }) => {
+  const resizer = new ResizerPage(page)
+  await resizer.open()
+  await resizer.upload(fixtures.noisyJpeg)
+  await expect(page.getByTestId('compression')).toHaveValue('40')
+  await expect(page.getByTestId('compression-note')).toContainText(/compressed by 40%/i)
+  await resizer.resize()
+  await expect(page.getByTestId('size-comparison')).toContainText(/smaller/i)
+  const original = readFileSync(fixtures.noisyJpeg).length
+  const download = await resizer.download()
+  const filePath = await download.path()
+  expect(readFileSync(filePath ?? '').length).toBeLessThan(original)
 })
 
 test('TC39 changing the background blocks the previous download', async ({ page }) => {

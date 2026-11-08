@@ -154,6 +154,7 @@ export async function resizeImage(
   const blob = await selectBlobUnderLimit({
     format,
     maxBytes: request.maxBytes,
+    preferredBytes: request.preferredBytes,
     encode: (quality) =>
       new Promise<Blob | null>((resolve) => {
         canvas.toBlob((value) => resolve(value), mime, quality)
@@ -189,6 +190,7 @@ export async function resizeImage(
     previewUrl,
     blob,
     maxBytes: request.maxBytes,
+    compression: request.compression,
     backgroundKey: backgroundKey(request.background),
   }
 }

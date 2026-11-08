@@ -8,6 +8,11 @@ import type {
 
 const MAX_SIZE_MESSAGE = 'Enter a maximum file size such as 500 KB or 2 MB.'
 
+/** Default reduction from the uploaded file size. 40% of 102 KB is about 61 KB. */
+export const DEFAULT_COMPRESSION = 40
+
+export const MAX_COMPRESSION = 80
+
 const SOURCE_LABELS: Record<SourceFormat, string> = {
   jpeg: 'JPEG',
   png: 'PNG',
@@ -63,6 +68,22 @@ export function maxBytesFromInput(
     return { ok: false, message: 'The maximum size cannot be more than 50 MB.' }
   }
   return { ok: true, bytes }
+}
+
+export function clampCompression(value: number): number {
+  if (!Number.isFinite(value)) return DEFAULT_COMPRESSION
+  return Math.min(MAX_COMPRESSION, Math.max(0, Math.round(value)))
+}
+
+/** Byte ceiling for a JPG download, measured from the original upload. */
+export function compressionTargetBytes(
+  originalBytes: number,
+  compression: number,
+): number | null {
+  const amount = clampCompression(compression)
+  if (amount <= 0 || !Number.isFinite(originalBytes) || originalBytes <= 1) return null
+  const target = Math.max(1, Math.round(originalBytes * (1 - amount / 100)))
+  return target < originalBytes ? target : originalBytes - 1
 }
 
 export function reductionPercent(

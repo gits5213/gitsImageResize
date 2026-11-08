@@ -19,6 +19,9 @@ import type {
 } from '../types/image.types.ts'
 import {
   buildDownloadFilename,
+  clampCompression,
+  compressionTargetBytes,
+  DEFAULT_COMPRESSION,
   downloadBlob,
   formatFileSize,
   linkedDimension,
@@ -37,6 +40,7 @@ export function useImageResize() {
   const [outputFormat, setOutputFormat] = useState<OutputFormat>('png')
   const [maxSizeInput, setMaxSizeInput] = useState('')
   const [maxSizeUnit, setMaxSizeUnit] = useState<FileSizeUnit>('kb')
+  const [compression, setCompression] = useState(DEFAULT_COMPRESSION)
   const [background, setBackground] = useState<BackgroundChoice>(DEFAULT_BACKGROUND)
   const [error, setError] = useState<string | null>(null)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
@@ -91,6 +95,7 @@ export function useImageResize() {
     resized.height === heightParsed.value &&
     resized.format === outputFormat &&
     resized.maxBytes === (maxParsed.ok ? maxParsed.bytes : null) &&
+    (outputFormat === 'png' || resized.compression === compression) &&
     resized.backgroundKey === backgroundKey(background)
   const previewStale = Boolean(resized) && !dimensionsMatch
 
@@ -132,6 +137,7 @@ export function useImageResize() {
       setOutputFormat(loaded.image.format === 'jpeg' ? 'jpeg' : 'png')
       setMaxSizeInput('')
       setMaxSizeUnit('kb')
+      setCompression(DEFAULT_COMPRESSION)
       setBackground(DEFAULT_BACKGROUND)
       setStatusMessage(
         ignoredExtras
@@ -196,6 +202,11 @@ export function useImageResize() {
     setStatusMessage(null)
   }
 
+  const changeCompression = (value: number) => {
+    setCompression(clampCompression(value))
+    setStatusMessage(null)
+  }
+
   const changeBackground = (next: BackgroundChoice) => {
     setBackground({
       ...next,
@@ -235,6 +246,8 @@ export function useImageResize() {
         height: height.value,
         format: outputFormat,
         maxBytes: maxParsed.bytes,
+        preferredBytes: compressionTargetBytes(source.byteSize, compression),
+        compression,
         background,
       })
       if (activeRequest !== requestId.current) {
@@ -245,12 +258,12 @@ export function useImageResize() {
       resizedUrlRef.current = result.previewUrl
       setResized(result)
       const saved = source ? reductionPercent(source.byteSize, result.byteSize) : null
-      const sizeNote =
-        maxParsed.bytes === null
-          ? ''
-          : saved === null
-            ? ` File size is ${formatFileSize(result.byteSize)}.`
-            : ` File size reduced by ${saved}% to ${formatFileSize(result.byteSize)}.`
+      const sizeLimited = maxParsed.bytes !== null || compression > 0
+      const sizeNote = !sizeLimited
+        ? ''
+        : saved === null
+          ? ` File size is ${formatFileSize(result.byteSize)}.`
+          : ` File size reduced by ${saved}% to ${formatFileSize(result.byteSize)}.`
       setStatusMessage(
         `Resized image ready at ${result.width} by ${result.height} pixels.${sizeNote}`,
       )
@@ -283,6 +296,7 @@ export function useImageResize() {
     setOutputFormat('png')
     setMaxSizeInput('')
     setMaxSizeUnit('kb')
+    setCompression(DEFAULT_COMPRESSION)
     setBackground(DEFAULT_BACKGROUND)
     setError(null)
     setPhase('idle')
@@ -318,6 +332,7 @@ export function useImageResize() {
     outputFormat,
     maxSizeInput,
     maxSizeUnit,
+    compression,
     background,
     error,
     widthError,
@@ -338,6 +353,7 @@ export function useImageResize() {
     changeOutputFormat,
     changeMaxSize,
     changeMaxSizeUnit,
+    changeCompression,
     changeBackground,
     resize,
     resetDimensions,

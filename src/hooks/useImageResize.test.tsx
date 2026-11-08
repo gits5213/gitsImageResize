@@ -4,6 +4,7 @@ import { DEFAULT_BACKGROUND } from '../services/backgrounds.ts'
 import { ImageProcessingError } from '../services/imageErrors.ts'
 import { readSourceImage, resizeImage } from '../services/imageResizeService.ts'
 import type { LoadedImage, ResizedImage } from '../types/image.types.ts'
+import { compressionTargetBytes, DEFAULT_COMPRESSION } from '../utils/imageHelpers.ts'
 import { useImageResize } from './useImageResize.ts'
 
 vi.mock('../services/imageResizeService.ts', () => ({
@@ -99,6 +100,7 @@ describe('useImageResize', () => {
       previewUrl: 'blob:resized',
       blob: new Blob(['jpeg']),
       maxBytes: null,
+      compression: DEFAULT_COMPRESSION,
       backgroundKey: 'original:studio:#ffffff:0',
     } satisfies ResizedImage)
 
@@ -136,6 +138,7 @@ describe('useImageResize', () => {
       previewUrl: 'blob:resized',
       blob: new Blob(['jpeg']),
       maxBytes: 500 * 1024,
+      compression: DEFAULT_COMPRESSION,
       backgroundKey: 'scene:ocean:#ffffff:25',
     } satisfies ResizedImage)
     const { result } = renderHook(() => useImageResize())
@@ -163,6 +166,8 @@ describe('useImageResize', () => {
       height: 1080,
       format: 'jpeg',
       maxBytes: 500 * 1024,
+      preferredBytes: compressionTargetBytes(2048, DEFAULT_COMPRESSION),
+      compression: DEFAULT_COMPRESSION,
       background: {
         mode: 'scene',
         scene: 'ocean',
@@ -173,6 +178,13 @@ describe('useImageResize', () => {
     expect(result.current.statusMessage).toBe(
       'Resized image ready at 1920 by 1080 pixels. File size reduced by 75% to 512 B.',
     )
+    expect(result.current.canDownload).toBe(true)
+
+    act(() => result.current.changeCompression(70))
+    expect(result.current.previewStale).toBe(true)
+    expect(result.current.canDownload).toBe(false)
+
+    act(() => result.current.changeCompression(DEFAULT_COMPRESSION))
     expect(result.current.canDownload).toBe(true)
 
     act(() => {
@@ -204,6 +216,7 @@ describe('useImageResize', () => {
     expect(result.current.background.lightFocus).toBe(100)
     act(() => result.current.clearImage())
     expect(result.current.maxSizeInput).toBe('')
+    expect(result.current.compression).toBe(DEFAULT_COMPRESSION)
     expect(result.current.background).toEqual(DEFAULT_BACKGROUND)
   })
 })

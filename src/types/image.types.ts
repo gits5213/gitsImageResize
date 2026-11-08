@@ -22,6 +22,7 @@ export interface ResizedImage {
   previewUrl: string
   blob: Blob
   maxBytes: number | null
+  compression: number
   backgroundKey: string
 }
 
@@ -40,6 +41,8 @@ export interface ResizeRequest {
   height: number
   format: OutputFormat
   maxBytes: number | null
+  preferredBytes: number | null
+  compression: number
   background: BackgroundChoice
 }
 

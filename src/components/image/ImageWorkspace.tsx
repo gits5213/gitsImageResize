@@ -95,6 +95,8 @@ export function ImageWorkspace() {
             maxSizeInput={editor.maxSizeInput}
             maxSizeUnit={editor.maxSizeUnit}
             maxSizeError={editor.maxSizeError}
+            compression={editor.compression}
+            originalBytes={editor.source?.byteSize ?? null}
             inputsDisabled={!editor.source || busy}
             resizing={editor.phase === 'resizing'}
             canResize={editor.canResize}
@@ -106,6 +108,7 @@ export function ImageWorkspace() {
             onOutputFormatChange={editor.changeOutputFormat}
             onMaxSizeChange={editor.changeMaxSize}
             onMaxSizeUnitChange={editor.changeMaxSizeUnit}
+            onCompressionChange={editor.changeCompression}
             onResize={() => {
               void editor.resize()
             }}
@@ -177,7 +180,8 @@ export function ImageWorkspace() {
       {editor.previewStale ? (
         <p className="text-sm text-slate-600 dark:text-slate-300">
           The preview is from the previous resize. Resize again before downloading so the
-          file matches the dimensions, format, maximum size, and background you chose.
+          file matches the dimensions, format, maximum size, compression, and background
+          you chose.
         </p>
       ) : null}
 

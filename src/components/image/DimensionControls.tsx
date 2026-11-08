@@ -1,6 +1,11 @@
 import { AlertTriangle, Lock, Unlock } from 'lucide-react'
 import type { FileSizeUnit, OutputFormat } from '../../types/image.types.ts'
-import { isOutputFormat } from '../../utils/imageHelpers.ts'
+import {
+  compressionTargetBytes,
+  formatFileSize,
+  isOutputFormat,
+  MAX_COMPRESSION,
+} from '../../utils/imageHelpers.ts'
 import { Button } from '../ui/Button.tsx'
 
 interface DimensionControlsProps {
@@ -13,6 +18,8 @@ interface DimensionControlsProps {
   maxSizeInput: string
   maxSizeUnit: FileSizeUnit
   maxSizeError: string | null
+  compression: number
+  originalBytes: number | null
   inputsDisabled: boolean
   resizing: boolean
   canResize: boolean
@@ -24,7 +31,30 @@ interface DimensionControlsProps {
   onOutputFormatChange: (format: OutputFormat) => void
   onMaxSizeChange: (value: string) => void
   onMaxSizeUnitChange: (unit: FileSizeUnit) => void
+  onCompressionChange: (value: number) => void
   onResize: () => void
+}
+
+function compressionNote(
+  format: OutputFormat,
+  originalBytes: number | null,
+  compression: number,
+): string {
+  if (format === 'png') {
+    return originalBytes === null
+      ? 'PNG stays lossless. Choose JPG to compress the download below the original file size.'
+      : `PNG stays lossless. Choose JPG to compress the download below the original ${formatFileSize(originalBytes)}.`
+  }
+  if (originalBytes === null) {
+    return 'JPG downloads are compressed below the original upload size.'
+  }
+  if (compression <= 0) {
+    return `Compression is off. The JPG may be larger than the original ${formatFileSize(originalBytes)}.`
+  }
+  const target = compressionTargetBytes(originalBytes, compression)
+  const targetLabel =
+    target === null ? formatFileSize(originalBytes) : formatFileSize(target)
+  return `A ${formatFileSize(originalBytes)} upload is compressed by ${compression}% for download, to about ${targetLabel} or smaller.`
 }
 
 export function DimensionControls({
@@ -37,6 +67,8 @@ export function DimensionControls({
   maxSizeInput,
   maxSizeUnit,
   maxSizeError,
+  compression,
+  originalBytes,
   inputsDisabled,
   resizing,
   canResize,
@@ -48,6 +80,7 @@ export function DimensionControls({
   onOutputFormatChange,
   onMaxSizeChange,
   onMaxSizeUnitChange,
+  onCompressionChange,
   onResize,
 }: DimensionControlsProps) {
   return (
@@ -209,7 +242,36 @@ export function DimensionControls({
           className={`mt-1 text-sm ${maxSizeError ? 'text-red-700 dark:text-red-300' : 'text-slate-600 dark:text-slate-300'}`}
         >
           {maxSizeError ??
-            'Optional. JPG downloads are compressed to stay at or below this size.'}
+            'Optional. A JPG also stays at or below this size when you set one.'}
+        </p>
+      </div>
+
+      <div className="max-w-md">
+        <label
+          htmlFor="compression"
+          className="text-sm font-medium text-slate-800 dark:text-slate-200"
+        >
+          Compression ({compression}% smaller)
+        </label>
+        <input
+          id="compression"
+          data-testid="compression"
+          type="range"
+          min={0}
+          max={MAX_COMPRESSION}
+          step={5}
+          value={compression}
+          disabled={inputsDisabled}
+          aria-describedby="compression-note"
+          onChange={(event) => onCompressionChange(Number(event.target.value))}
+          className="mt-2 w-full"
+        />
+        <p
+          id="compression-note"
+          data-testid="compression-note"
+          className="mt-1 text-sm text-slate-600 dark:text-slate-300"
+        >
+          {compressionNote(outputFormat, originalBytes, compression)}
         </p>
       </div>
 

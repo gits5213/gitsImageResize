@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildDownloadFilename,
+  compressionTargetBytes,
   formatDimensions,
   formatFileSize,
   isOutputFormat,
@@ -68,6 +69,14 @@ describe('maxBytesFromInput', () => {
     expect(maxBytesFromInput('0', 'kb').ok).toBe(false)
     expect(maxBytesFromInput('abc', 'mb').ok).toBe(false)
     expect(maxBytesFromInput('51', 'mb').ok).toBe(false)
+  })
+})
+
+describe('compressionTargetBytes', () => {
+  it('reduces a 102 KB upload by the default 40 percent', () => {
+    const original = 102 * 1024
+    expect(compressionTargetBytes(original, 40)).toBe(Math.round(original * 0.6))
+    expect(compressionTargetBytes(original, 0)).toBeNull()
   })
 })
 
