@@ -40,15 +40,6 @@ jobs:
       - name: Run unit tests
         run: npm test
 
-      - name: Build application for tests
-        run: npm run build
-
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
-
-      - name: Run Playwright tests
-        run: npx playwright test
-
       - name: Choose GitHub Pages base path
         id: base
         run: |

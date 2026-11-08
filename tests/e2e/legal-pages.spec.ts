@@ -20,7 +20,10 @@ for (const [path, heading, id] of pages) {
 test('TC26 footer links open the legal pages', async ({ page }) => {
   await page.goto('/')
   const footer = page.getByRole('contentinfo')
-  await expect(footer.getByTestId('github-unconfigured')).toBeVisible()
+  await expect(footer.getByRole('link', { name: 'GitHub Repository' })).toHaveAttribute(
+    'href',
+    'https://github.com/gits5213/gitsImageResize',
+  )
 
   for (const [path, heading] of [
     ['/privacy', 'Privacy Policy'],

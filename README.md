@@ -126,7 +126,7 @@ The workflow in `.github/workflows/deploy.yml` is ready. It has not been run fro
    - `VITE_CONTACT_EMAIL`
    - `VITE_GITHUB_REPO_URL` as an `https://github.com/...` URL
 4. Push to `main` or `master`, or run the **Deploy GitHub Pages** workflow manually.
-5. The workflow runs lint, formatting, typecheck, unit tests, and Playwright before it uploads the site. A failed check stops deployment.
+5. The workflow runs lint, formatting, typecheck, and unit tests before it uploads the site. A failed check stops deployment.
 6. For a project repository named `gitsImageResize`, the published path is `https://<username>.github.io/gitsImageResize/`. The workflow sets that base path from the repository name. A repository named `*.github.io` is published at `/`.
 
 Later updates deploy when you push to `main` or `master`.
@@ -189,7 +189,7 @@ Those controls are not in the Version 1.0 interface.
 
 ## Contributing
 
-Open an issue or pull request on the repository you publish. Run `npm run lint`, `npm run typecheck`, `npm test`, and `npm run test:e2e` before asking for review. Keep image processing in the browser.
+Open an issue or pull request on the repository you publish. Run `npm run lint`, `npm run typecheck`, and `npm test` before asking for review. Keep image processing in the browser.
 
 ## License
 

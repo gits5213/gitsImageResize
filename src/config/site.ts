@@ -11,7 +11,9 @@ export const siteConfig = {
   version: '1.0.0',
   ownerName: readEnv(import.meta.env.VITE_SITE_OWNER),
   contactEmail: readEnv(import.meta.env.VITE_CONTACT_EMAIL),
-  githubRepoUrl: readEnv(import.meta.env.VITE_GITHUB_REPO_URL),
+  githubRepoUrl:
+    readEnv(import.meta.env.VITE_GITHUB_REPO_URL) ||
+    'https://github.com/gits5213/gitsImageResize',
   draftDate: '7 November 2026',
 }
 
