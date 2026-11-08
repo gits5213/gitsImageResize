@@ -28,7 +28,10 @@ export function ImageWorkspace() {
   const selectionKey = `${editor.background.mode}:${editor.background.scene}:${editor.background.color}`
   const appliedSelection = useRef<string | null>(null)
   const resizeRef = useRef(editor.resize)
-  resizeRef.current = editor.resize
+
+  useEffect(() => {
+    resizeRef.current = editor.resize
+  }, [editor.resize])
 
   useEffect(() => {
     if (!editor.source) {
