@@ -10,6 +10,9 @@ test('TC01 homepage loads', async ({ page }) => {
   ).toBeVisible()
   await expect(page.getByTestId('dropzone')).toBeVisible()
   await expect(page.getByText('Drop an image here')).toBeVisible()
+  await expect(page.getByTestId('max-file-size')).toBeVisible()
+  await expect(page.getByTestId('background-sunset')).toBeVisible()
+  await expect(page.getByTestId('light-focus')).toBeVisible()
 })
 
 test('TC02 image upload works', async ({ page }) => {

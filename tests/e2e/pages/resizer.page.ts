@@ -40,6 +40,37 @@ export class ResizerPage {
     await this.height().fill(value)
   }
 
+  async setMaxFileSize(value: string): Promise<void> {
+    await this.page.getByTestId('max-file-size').fill(value)
+  }
+
+  async chooseBackground(id: string): Promise<void> {
+    await this.page.getByTestId(`background-${id}`).click()
+  }
+
+  async setLightFocus(value: string): Promise<void> {
+    await this.page.getByTestId('light-focus').fill(value)
+  }
+
+  async sampleResized(x: number, y: number): Promise<number[]> {
+    const preview = this.page.getByTestId('resized-preview')
+    await expect
+      .poll(() => preview.evaluate((image: HTMLImageElement) => image.naturalWidth))
+      .toBeGreaterThan(0)
+    return preview.evaluate(
+      (image: HTMLImageElement, point) => {
+        const canvas = document.createElement('canvas')
+        canvas.width = image.naturalWidth
+        canvas.height = image.naturalHeight
+        const context = canvas.getContext('2d')
+        if (!context) throw new Error('Canvas is unavailable.')
+        context.drawImage(image, 0, 0)
+        return Array.from(context.getImageData(point.x, point.y, 1, 1).data)
+      },
+      { x, y },
+    )
+  }
+
   async resize(): Promise<void> {
     await this.page.getByTestId('resize-button').click()
     await expect(this.page.getByTestId('resized-preview')).toBeVisible()

@@ -1,4 +1,12 @@
-import type { DimensionAxis, OutputFormat, SourceFormat } from '../types/image.types.ts'
+import { MAX_FILE_BYTES } from '../config/limits.ts'
+import type {
+  DimensionAxis,
+  FileSizeUnit,
+  OutputFormat,
+  SourceFormat,
+} from '../types/image.types.ts'
+
+const MAX_SIZE_MESSAGE = 'Enter a maximum file size such as 500 KB or 2 MB.'
 
 const SOURCE_LABELS: Record<SourceFormat, string> = {
   jpeg: 'JPEG',
@@ -37,6 +45,32 @@ export function formatFileSize(bytes: number): string {
   }
   const digits = value >= 100 ? 0 : 1
   return `${value.toFixed(digits)} ${units[unitIndex]}`
+}
+
+export function maxBytesFromInput(
+  raw: string,
+  unit: FileSizeUnit,
+): { ok: true; bytes: number | null } | { ok: false; message: string } {
+  const value = raw.trim()
+  if (value === '') return { ok: true, bytes: null }
+  if (!/^\d+(\.\d+)?$/.test(value)) return { ok: false, message: MAX_SIZE_MESSAGE }
+  const amount = Number(value)
+  if (!Number.isFinite(amount) || amount <= 0)
+    return { ok: false, message: MAX_SIZE_MESSAGE }
+  const bytes = Math.round(amount * (unit === 'mb' ? 1024 * 1024 : 1024))
+  if (bytes < 1024) return { ok: false, message: 'The smallest maximum size is 1 KB.' }
+  if (bytes > MAX_FILE_BYTES) {
+    return { ok: false, message: 'The maximum size cannot be more than 50 MB.' }
+  }
+  return { ok: true, bytes }
+}
+
+export function reductionPercent(
+  originalBytes: number,
+  resultBytes: number,
+): number | null {
+  if (originalBytes <= 0 || resultBytes >= originalBytes) return null
+  return Math.round((1 - resultBytes / originalBytes) * 100)
 }
 
 export function formatDimensions(width: number, height: number): string {

@@ -18,7 +18,7 @@ Version 1.0 includes:
 - Privacy Policy, Terms of Use, Security & Privacy, Disclaimer, and Contact pages
 - Optional Cloudflare Web Analytics that stays off until configured
 
-Image compression and background editing are not part of this version. The image pipeline lives in `src/services` and `src/utils` so those features can be added later without replacing the upload and preview flow.
+A maximum download size can reduce a JPG until it fits the chosen KB or MB limit. The background controls can keep the original, use a solid color or transparency, or place the subject on a scenario such as studio, sunset, ocean, forest, or city night. Light focus brightens the center and darkens the edges. Plain backdrops are removed in the browser. Busy photos use a soft center cutout.
 
 ## Technology stack
 
@@ -183,10 +183,8 @@ The interface uses semantic regions, labeled controls, a skip link, visible focu
 
 ## Future roadmap
 
-- Version 2.0: compression toward a target file size, with a before-and-after size comparison.
-- Version 3.0: background removal and replacement, including transparency and solid colors.
-
-Those controls are not in the Version 1.0 interface.
+- Maximum file size: optional KB or MB limit. JPG quality is reduced until the file fits, and the page compares the original and resized sizes. PNG files that cannot reach the limit ask you to choose JPG or raise the maximum.
+- Backgrounds: original, solid color, transparency, and scenario templates, plus a light-focus control. Removal is done in the browser and works best on a plain backdrop.
 
 ## Contributing
 

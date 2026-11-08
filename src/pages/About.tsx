@@ -26,8 +26,9 @@ export function About() {
         </h2>
         <p>
           Version 1.0 covers upload, pixel resizing, aspect-ratio lock, preview, download,
-          reset, and clear. Compression targets and background editing are planned as
-          later versions and are not part of this release.
+          reset, and clear. You can set a maximum download size, replace the background
+          with a color or a scenario, and add a light focus. The image stays in your
+          browser.
         </p>
         <h2 className="pt-4 text-xl font-semibold text-slate-900 dark:text-white">
           What this site does not promise

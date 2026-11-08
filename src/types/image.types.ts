@@ -1,3 +1,5 @@
+import type { BackgroundChoice } from '../services/backgrounds.ts'
+
 export type OutputFormat = 'jpeg' | 'png'
 
 export type SourceFormat =
@@ -19,6 +21,8 @@ export interface ResizedImage {
   format: OutputFormat
   previewUrl: string
   blob: Blob
+  maxBytes: number | null
+  backgroundKey: string
 }
 
 export interface LoadedImage {
@@ -35,7 +39,11 @@ export interface ResizeRequest {
   width: number
   height: number
   format: OutputFormat
+  maxBytes: number | null
+  background: BackgroundChoice
 }
+
+export type FileSizeUnit = 'kb' | 'mb'
 
 export type DimensionAxis = 'width' | 'height'
 

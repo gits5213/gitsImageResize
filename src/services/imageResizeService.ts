@@ -7,6 +7,9 @@ import type {
 } from '../types/image.types.ts'
 import { mimeForFormat } from '../utils/imageHelpers.ts'
 import { validateImageFile } from '../utils/imageValidation.ts'
+import { backgroundKey } from './backgrounds.ts'
+import { composeBackground } from './backgroundCompose.ts'
+import { selectBlobUnderLimit } from './fileSizeLimit.ts'
 import { ImageProcessingError } from './imageErrors.ts'
 
 const DECODE_MESSAGE =
@@ -112,32 +115,52 @@ export async function resizeImage(
   }
 
   const scaled = await bitmapForOutput(source, width, height)
+  const subject = document.createElement('canvas')
   try {
     context.imageSmoothingEnabled = true
     context.imageSmoothingQuality = 'high'
-    if (format === 'jpeg') {
-      context.fillStyle = '#ffffff'
-      context.fillRect(0, 0, width, height)
+    const editBackground =
+      request.background.mode !== 'original' || request.background.lightFocus > 0
+    if (!editBackground) {
+      if (format === 'jpeg') {
+        context.fillStyle = '#ffffff'
+        context.fillRect(0, 0, width, height)
+      }
+      context.drawImage(scaled.bitmap, 0, 0, width, height)
+    } else {
+      subject.width = width
+      subject.height = height
+      const subjectContext = subject.getContext('2d', { alpha: true })
+      if (!subjectContext) {
+        throw new ImageProcessingError(
+          'This browser could not prepare the new background.',
+        )
+      }
+      subjectContext.imageSmoothingEnabled = true
+      subjectContext.imageSmoothingQuality = 'high'
+      subjectContext.drawImage(scaled.bitmap, 0, 0, width, height)
+      composeBackground(context, subject, request.background, format === 'jpeg')
     }
-    context.drawImage(scaled.bitmap, 0, 0, width, height)
-  } catch {
+  } catch (error) {
+    if (error instanceof ImageProcessingError) throw error
     throw new ImageProcessingError(SIZE_MESSAGE)
   } finally {
+    subject.width = 0
+    subject.height = 0
     if (scaled.closeAfterDraw) scaled.bitmap.close()
   }
 
   const mime = mimeForFormat(format)
-  const blob = await new Promise<Blob | null>((resolve) => {
-    canvas.toBlob((value) => resolve(value), mime, format === 'png' ? undefined : 0.92)
+  const blob = await selectBlobUnderLimit({
+    format,
+    maxBytes: request.maxBytes,
+    encode: (quality) =>
+      new Promise<Blob | null>((resolve) => {
+        canvas.toBlob((value) => resolve(value), mime, quality)
+      }),
   })
   canvas.width = 0
   canvas.height = 0
-
-  if (!blob) {
-    throw new ImageProcessingError(
-      'This browser could not create the resized image. Try PNG or JPG, or smaller dimensions.',
-    )
-  }
 
   const previewUrl = URL.createObjectURL(blob)
   let decoded: ImageBitmap | null = null
@@ -165,5 +188,7 @@ export async function resizeImage(
     format,
     previewUrl,
     blob,
+    maxBytes: request.maxBytes,
+    backgroundKey: backgroundKey(request.background),
   }
 }

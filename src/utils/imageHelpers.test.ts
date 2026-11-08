@@ -5,6 +5,8 @@ import {
   formatFileSize,
   isOutputFormat,
   linkedDimension,
+  maxBytesFromInput,
+  reductionPercent,
 } from './imageHelpers.ts'
 
 describe('linkedDimension', () => {
@@ -49,6 +51,31 @@ describe('buildDownloadFilename', () => {
       /[<>]/,
     )
     expect(buildDownloadFilename('***', 1, 1, 'jpeg')).toBe('image-1x1.jpg')
+  })
+})
+
+describe('maxBytesFromInput', () => {
+  it('treats a blank value as no limit', () => {
+    expect(maxBytesFromInput('  ', 'kb')).toEqual({ ok: true, bytes: null })
+  })
+
+  it('converts kilobytes and megabytes', () => {
+    expect(maxBytesFromInput('500', 'kb')).toEqual({ ok: true, bytes: 500 * 1024 })
+    expect(maxBytesFromInput('2', 'mb')).toEqual({ ok: true, bytes: 2 * 1024 * 1024 })
+  })
+
+  it('rejects zero, text, and sizes above 50 MB', () => {
+    expect(maxBytesFromInput('0', 'kb').ok).toBe(false)
+    expect(maxBytesFromInput('abc', 'mb').ok).toBe(false)
+    expect(maxBytesFromInput('51', 'mb').ok).toBe(false)
+  })
+})
+
+describe('reductionPercent', () => {
+  it('rounds the share of bytes removed', () => {
+    expect(reductionPercent(1000, 250)).toBe(75)
+    expect(reductionPercent(1000, 1000)).toBeNull()
+    expect(reductionPercent(1000, 1200)).toBeNull()
   })
 })
 

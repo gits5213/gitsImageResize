@@ -5,11 +5,25 @@ import {
   resizeImage,
 } from '../services/imageResizeService.ts'
 import { toUserMessage } from '../services/imageErrors.ts'
-import type { OutputFormat, ResizedImage, SourceImage } from '../types/image.types.ts'
+import {
+  type BackgroundChoice,
+  DEFAULT_BACKGROUND,
+  backgroundKey,
+  clampLightFocus,
+} from '../services/backgrounds.ts'
+import type {
+  FileSizeUnit,
+  OutputFormat,
+  ResizedImage,
+  SourceImage,
+} from '../types/image.types.ts'
 import {
   buildDownloadFilename,
   downloadBlob,
+  formatFileSize,
   linkedDimension,
+  maxBytesFromInput,
+  reductionPercent,
   revokeObjectUrl,
 } from '../utils/imageHelpers.ts'
 import { parseDimensionInput, validatePixelSize } from '../utils/imageValidation.ts'
@@ -21,6 +35,9 @@ export function useImageResize() {
   const [heightInput, setHeightInput] = useState('')
   const [lockAspect, setLockAspect] = useState(true)
   const [outputFormat, setOutputFormat] = useState<OutputFormat>('png')
+  const [maxSizeInput, setMaxSizeInput] = useState('')
+  const [maxSizeUnit, setMaxSizeUnit] = useState<FileSizeUnit>('kb')
+  const [background, setBackground] = useState<BackgroundChoice>(DEFAULT_BACKGROUND)
   const [error, setError] = useState<string | null>(null)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const [phase, setPhase] = useState<'idle' | 'reading' | 'resizing'>('idle')
@@ -59,6 +76,8 @@ export function useImageResize() {
   const heightParsed = parseDimensionInput(heightInput)
   const widthError = source && !widthParsed.ok ? widthParsed.message : null
   const heightError = source && !heightParsed.ok ? heightParsed.message : null
+  const maxParsed = maxBytesFromInput(maxSizeInput, maxSizeUnit)
+  const maxSizeError = source && !maxParsed.ok ? maxParsed.message : null
   const sizeError =
     source && widthParsed.ok && heightParsed.ok
       ? validatePixelSize(widthParsed.value, heightParsed.value, limits)
@@ -70,11 +89,19 @@ export function useImageResize() {
     resized !== null &&
     resized.width === widthParsed.value &&
     resized.height === heightParsed.value &&
-    resized.format === outputFormat
+    resized.format === outputFormat &&
+    resized.maxBytes === (maxParsed.ok ? maxParsed.bytes : null) &&
+    resized.backgroundKey === backgroundKey(background)
   const previewStale = Boolean(resized) && !dimensionsMatch
 
   const canResize = Boolean(
-    source && hasBitmap && phase === 'idle' && !widthError && !heightError && !sizeError,
+    source &&
+    hasBitmap &&
+    phase === 'idle' &&
+    !widthError &&
+    !heightError &&
+    !maxSizeError &&
+    !sizeError,
   )
   const canDownload = Boolean(resized && !previewStale && phase === 'idle')
 
@@ -103,6 +130,9 @@ export function useImageResize() {
       setHeightInput(String(loaded.image.height))
       setLockAspect(true)
       setOutputFormat(loaded.image.format === 'jpeg' ? 'jpeg' : 'png')
+      setMaxSizeInput('')
+      setMaxSizeUnit('kb')
+      setBackground(DEFAULT_BACKGROUND)
       setStatusMessage(
         ignoredExtras
           ? 'Only one image can be resized at a time. The first file was used.'
@@ -156,6 +186,24 @@ export function useImageResize() {
     setStatusMessage(null)
   }
 
+  const changeMaxSize = (value: string) => {
+    setMaxSizeInput(value)
+    setStatusMessage(null)
+  }
+
+  const changeMaxSizeUnit = (unit: FileSizeUnit) => {
+    setMaxSizeUnit(unit)
+    setStatusMessage(null)
+  }
+
+  const changeBackground = (next: BackgroundChoice) => {
+    setBackground({
+      ...next,
+      lightFocus: clampLightFocus(next.lightFocus),
+    })
+    setStatusMessage(null)
+  }
+
   const resize = async () => {
     const bitmap = bitmapRef.current
     if (!source || !bitmap || phase !== 'idle') return
@@ -163,6 +211,10 @@ export function useImageResize() {
     const height = parseDimensionInput(heightInput)
     if (!width.ok || !height.ok) {
       setError('Enter positive whole-number dimensions before resizing.')
+      return
+    }
+    if (!maxParsed.ok) {
+      setError(maxParsed.message)
       return
     }
     const sizeProblem = validatePixelSize(width.value, height.value, limits)
@@ -182,6 +234,8 @@ export function useImageResize() {
         width: width.value,
         height: height.value,
         format: outputFormat,
+        maxBytes: maxParsed.bytes,
+        background,
       })
       if (activeRequest !== requestId.current) {
         revokeObjectUrl(result.previewUrl)
@@ -190,8 +244,15 @@ export function useImageResize() {
       revokeObjectUrl(resizedUrlRef.current)
       resizedUrlRef.current = result.previewUrl
       setResized(result)
+      const saved = source ? reductionPercent(source.byteSize, result.byteSize) : null
+      const sizeNote =
+        maxParsed.bytes === null
+          ? ''
+          : saved === null
+            ? ` File size is ${formatFileSize(result.byteSize)}.`
+            : ` File size reduced by ${saved}% to ${formatFileSize(result.byteSize)}.`
       setStatusMessage(
-        `Resized image ready at ${result.width} by ${result.height} pixels.`,
+        `Resized image ready at ${result.width} by ${result.height} pixels.${sizeNote}`,
       )
     } catch (caught) {
       if (activeRequest !== requestId.current) return
@@ -220,6 +281,9 @@ export function useImageResize() {
     setHeightInput('')
     setLockAspect(true)
     setOutputFormat('png')
+    setMaxSizeInput('')
+    setMaxSizeUnit('kb')
+    setBackground(DEFAULT_BACKGROUND)
     setError(null)
     setPhase('idle')
     setStatusMessage('Image cleared from this page.')
@@ -252,9 +316,13 @@ export function useImageResize() {
     heightInput,
     lockAspect,
     outputFormat,
+    maxSizeInput,
+    maxSizeUnit,
+    background,
     error,
     widthError,
     heightError,
+    maxSizeError,
     sizeError,
     statusMessage,
     phase,
@@ -268,6 +336,9 @@ export function useImageResize() {
     changeHeight,
     toggleLock,
     changeOutputFormat,
+    changeMaxSize,
+    changeMaxSizeUnit,
+    changeBackground,
     resize,
     resetDimensions,
     clearImage,

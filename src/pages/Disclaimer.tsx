@@ -18,7 +18,9 @@ export function Disclaimer() {
           the original, and a larger size does not increase the true resolution of the
           source. Turning off the aspect-ratio lock can distort the picture. Saving as
           JPEG flattens transparency onto white and uses lossy compression, so the
-          downloaded file can look different from the original. Very large files or
+          downloaded file can look different from the original. A new background replaces
+          a plain backdrop, or keeps a soft center when the photo is busy. Light focus is
+          a brightness effect around the middle of the picture. Very large files or
           dimensions can fail when the browser runs out of memory or rejects the canvas
           size.
         </p>

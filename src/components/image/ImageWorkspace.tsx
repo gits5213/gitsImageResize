@@ -4,11 +4,21 @@ import {
   formatDimensions,
   formatFileSize,
   formatLabel,
+  reductionPercent,
 } from '../../utils/imageHelpers.ts'
 import { Button } from '../ui/Button.tsx'
+import { BackgroundControls } from './BackgroundControls.tsx'
 import { DimensionControls } from './DimensionControls.tsx'
 import { ImageUploader } from './ImageUploader.tsx'
 import { PreviewCard } from './PreviewCard.tsx'
+
+function sizeComparison(originalBytes: number, resultBytes: number): string {
+  const original = formatFileSize(originalBytes)
+  const result = formatFileSize(resultBytes)
+  const saved = reductionPercent(originalBytes, resultBytes)
+  if (saved === null) return `Original ${original}. Resized file ${result}.`
+  return `Original ${original}. Resized file ${result}, ${saved}% smaller.`
+}
 
 export function ImageWorkspace() {
   const editor = useImageResize()
@@ -82,6 +92,9 @@ export function ImageWorkspace() {
             heightError={editor.heightError}
             lockAspect={editor.lockAspect}
             outputFormat={editor.outputFormat}
+            maxSizeInput={editor.maxSizeInput}
+            maxSizeUnit={editor.maxSizeUnit}
+            maxSizeError={editor.maxSizeError}
             inputsDisabled={!editor.source || busy}
             resizing={editor.phase === 'resizing'}
             canResize={editor.canResize}
@@ -91,6 +104,8 @@ export function ImageWorkspace() {
             onHeightChange={editor.changeHeight}
             onToggleLock={editor.toggleLock}
             onOutputFormatChange={editor.changeOutputFormat}
+            onMaxSizeChange={editor.changeMaxSize}
+            onMaxSizeUnitChange={editor.changeMaxSizeUnit}
             onResize={() => {
               void editor.resize()
             }}
@@ -118,6 +133,17 @@ export function ImageWorkspace() {
         </div>
       </div>
 
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 dark:border-slate-800 dark:bg-slate-900">
+        <h2 className="text-lg font-semibold">Background</h2>
+        <div className="mt-4">
+          <BackgroundControls
+            value={editor.background}
+            disabled={!editor.source || busy}
+            onChange={editor.changeBackground}
+          />
+        </div>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2">
         <PreviewCard
           title="Original"
@@ -139,10 +165,19 @@ export function ImageWorkspace() {
         />
       </div>
 
+      {editor.source && editor.resized ? (
+        <p
+          data-testid="size-comparison"
+          className="text-sm text-slate-600 dark:text-slate-300"
+        >
+          {sizeComparison(editor.source.byteSize, editor.resized.byteSize)}
+        </p>
+      ) : null}
+
       {editor.previewStale ? (
         <p className="text-sm text-slate-600 dark:text-slate-300">
           The preview is from the previous resize. Resize again before downloading so the
-          file matches the dimensions and format you chose.
+          file matches the dimensions, format, maximum size, and background you chose.
         </p>
       ) : null}
 

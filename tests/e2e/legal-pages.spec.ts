@@ -28,6 +28,11 @@ test('TC26 footer links open the legal pages', async ({ page }) => {
     'href',
     'https://mdszaman.com/contact/',
   )
+  await expect(footer.getByRole('link', { name: 'Contact' })).not.toHaveAttribute(
+    'target',
+    '_blank',
+  )
+  await expect(footer.getByTestId('visitor-count')).toContainText('Visitors')
 
   for (const [path, heading] of [
     ['/privacy', 'Privacy Policy'],

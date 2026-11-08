@@ -1,5 +1,5 @@
 import { AlertTriangle, Lock, Unlock } from 'lucide-react'
-import type { OutputFormat } from '../../types/image.types.ts'
+import type { FileSizeUnit, OutputFormat } from '../../types/image.types.ts'
 import { isOutputFormat } from '../../utils/imageHelpers.ts'
 import { Button } from '../ui/Button.tsx'
 
@@ -10,6 +10,9 @@ interface DimensionControlsProps {
   heightError: string | null
   lockAspect: boolean
   outputFormat: OutputFormat
+  maxSizeInput: string
+  maxSizeUnit: FileSizeUnit
+  maxSizeError: string | null
   inputsDisabled: boolean
   resizing: boolean
   canResize: boolean
@@ -19,6 +22,8 @@ interface DimensionControlsProps {
   onHeightChange: (value: string) => void
   onToggleLock: () => void
   onOutputFormatChange: (format: OutputFormat) => void
+  onMaxSizeChange: (value: string) => void
+  onMaxSizeUnitChange: (unit: FileSizeUnit) => void
   onResize: () => void
 }
 
@@ -29,6 +34,9 @@ export function DimensionControls({
   heightError,
   lockAspect,
   outputFormat,
+  maxSizeInput,
+  maxSizeUnit,
+  maxSizeError,
   inputsDisabled,
   resizing,
   canResize,
@@ -38,6 +46,8 @@ export function DimensionControls({
   onHeightChange,
   onToggleLock,
   onOutputFormatChange,
+  onMaxSizeChange,
+  onMaxSizeUnitChange,
   onResize,
 }: DimensionControlsProps) {
   return (
@@ -156,6 +166,51 @@ export function DimensionControls({
             <option value="png">PNG</option>
           </select>
         </div>
+      </div>
+
+      <div className="max-w-sm">
+        <label
+          htmlFor="max-file-size"
+          className="text-sm font-medium text-slate-800 dark:text-slate-200"
+        >
+          Maximum file size
+        </label>
+        <div className="mt-1 flex gap-2">
+          <input
+            id="max-file-size"
+            data-testid="max-file-size"
+            inputMode="decimal"
+            placeholder="No limit"
+            aria-invalid={Boolean(maxSizeError)}
+            aria-describedby="max-file-size-note"
+            disabled={inputsDisabled}
+            value={maxSizeInput}
+            onChange={(event) => onMaxSizeChange(event.target.value)}
+            className="min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 dark:border-slate-700 dark:bg-slate-950"
+          />
+          <select
+            aria-label="Maximum file size unit"
+            data-testid="max-file-size-unit"
+            className="min-h-11 rounded-xl border border-slate-300 bg-white px-3 dark:border-slate-700 dark:bg-slate-950"
+            value={maxSizeUnit}
+            disabled={inputsDisabled}
+            onChange={(event) => {
+              if (event.target.value === 'kb' || event.target.value === 'mb') {
+                onMaxSizeUnitChange(event.target.value)
+              }
+            }}
+          >
+            <option value="kb">KB</option>
+            <option value="mb">MB</option>
+          </select>
+        </div>
+        <p
+          id="max-file-size-note"
+          className={`mt-1 text-sm ${maxSizeError ? 'text-red-700 dark:text-red-300' : 'text-slate-600 dark:text-slate-300'}`}
+        >
+          {maxSizeError ??
+            'Optional. JPG downloads are compressed to stay at or below this size.'}
+        </p>
       </div>
 
       {distortionWarning ? (
