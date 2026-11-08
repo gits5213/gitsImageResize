@@ -7,8 +7,9 @@ export function About() {
       <div className="mt-6 space-y-4 leading-relaxed text-slate-700 dark:text-slate-300">
         <p>
           {siteConfig.name} version {siteConfig.version} is a free browser tool for
-          changing the pixel dimensions of JPEG, PNG, and WebP images. It is meant for
-          anyone who wants a straightforward resize without creating an account.
+          changing the pixel dimensions of common image files. Downloads are PNG or JPG.
+          It is meant for anyone who wants a straightforward resize without creating an
+          account.
         </p>
         <p>
           The resizer reads the file you select, draws it to a canvas at the size you

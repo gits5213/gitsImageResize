@@ -27,8 +27,9 @@ export function Disclaimer() {
       <LegalSection heading="Browser differences">
         <p>
           Browsers do not all support the same maximum image size, memory budget, or
-          output encoder. A file that resizes in one browser may fail in another. WebP
-          output depends on the browser being able to encode WebP.
+          output encoder. A file that resizes in one browser may fail in another. AVIF,
+          TIFF, HEIC, and SVG open only when this browser can decode them. An animated GIF
+          uses its first frame. Downloads are PNG or JPG.
         </p>
       </LegalSection>
 

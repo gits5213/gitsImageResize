@@ -2,7 +2,7 @@ import { LegalPage, LegalSection } from './LegalPage.tsx'
 
 const steps = [
   'You select an image from your device, or you drop one onto the page.',
-  'Your browser reads the file and checks that it looks like a JPEG, PNG, or WebP image.',
+  'Your browser reads the file and checks that it looks like a supported image.',
   'Your browser draws a resized copy locally at the pixel size you enter.',
   'You preview the resized result next to the original.',
   'You download the new file through your browser. The download is not sent to an application server.',

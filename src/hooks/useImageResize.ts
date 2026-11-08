@@ -5,7 +5,7 @@ import {
   resizeImage,
 } from '../services/imageResizeService.ts'
 import { toUserMessage } from '../services/imageErrors.ts'
-import type { ImageFormat, ResizedImage, SourceImage } from '../types/image.types.ts'
+import type { OutputFormat, ResizedImage, SourceImage } from '../types/image.types.ts'
 import {
   buildDownloadFilename,
   downloadBlob,
@@ -20,7 +20,7 @@ export function useImageResize() {
   const [widthInput, setWidthInput] = useState('')
   const [heightInput, setHeightInput] = useState('')
   const [lockAspect, setLockAspect] = useState(true)
-  const [outputFormat, setOutputFormat] = useState<ImageFormat>('png')
+  const [outputFormat, setOutputFormat] = useState<OutputFormat>('png')
   const [error, setError] = useState<string | null>(null)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const [phase, setPhase] = useState<'idle' | 'reading' | 'resizing'>('idle')
@@ -102,7 +102,7 @@ export function useImageResize() {
       setWidthInput(String(loaded.image.width))
       setHeightInput(String(loaded.image.height))
       setLockAspect(true)
-      setOutputFormat(loaded.image.format)
+      setOutputFormat(loaded.image.format === 'jpeg' ? 'jpeg' : 'png')
       setStatusMessage(
         ignoredExtras
           ? 'Only one image can be resized at a time. The first file was used.'
@@ -151,7 +151,7 @@ export function useImageResize() {
     }
   }
 
-  const changeOutputFormat = (format: ImageFormat) => {
+  const changeOutputFormat = (format: OutputFormat) => {
     setOutputFormat(format)
     setStatusMessage(null)
   }

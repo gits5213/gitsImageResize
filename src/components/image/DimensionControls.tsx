@@ -1,6 +1,6 @@
 import { AlertTriangle, Lock, Unlock } from 'lucide-react'
-import type { ImageFormat } from '../../types/image.types.ts'
-import { isImageFormat } from '../../utils/imageHelpers.ts'
+import type { OutputFormat } from '../../types/image.types.ts'
+import { isOutputFormat } from '../../utils/imageHelpers.ts'
 import { Button } from '../ui/Button.tsx'
 
 interface DimensionControlsProps {
@@ -9,7 +9,7 @@ interface DimensionControlsProps {
   widthError: string | null
   heightError: string | null
   lockAspect: boolean
-  outputFormat: ImageFormat
+  outputFormat: OutputFormat
   inputsDisabled: boolean
   resizing: boolean
   canResize: boolean
@@ -18,7 +18,7 @@ interface DimensionControlsProps {
   onWidthChange: (value: string) => void
   onHeightChange: (value: string) => void
   onToggleLock: () => void
-  onOutputFormatChange: (format: ImageFormat) => void
+  onOutputFormatChange: (format: OutputFormat) => void
   onResize: () => void
 }
 
@@ -148,13 +148,12 @@ export function DimensionControls({
             value={outputFormat}
             disabled={inputsDisabled}
             onChange={(event) => {
-              if (isImageFormat(event.target.value))
+              if (isOutputFormat(event.target.value))
                 onOutputFormatChange(event.target.value)
             }}
           >
-            <option value="jpeg">JPEG</option>
+            <option value="jpeg">JPG</option>
             <option value="png">PNG</option>
-            <option value="webp">WebP</option>
           </select>
         </div>
       </div>

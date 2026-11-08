@@ -1,19 +1,28 @@
-import type { DimensionAxis, ImageFormat } from '../types/image.types.ts'
+import type { DimensionAxis, OutputFormat, SourceFormat } from '../types/image.types.ts'
 
-export function isImageFormat(value: string): value is ImageFormat {
-  return value === 'jpeg' || value === 'png' || value === 'webp'
+const SOURCE_LABELS: Record<SourceFormat, string> = {
+  jpeg: 'JPEG',
+  png: 'PNG',
+  gif: 'GIF',
+  webp: 'WebP',
+  bmp: 'BMP',
+  avif: 'AVIF',
+  ico: 'ICO',
+  svg: 'SVG',
+  tiff: 'TIFF',
+  heic: 'HEIC',
 }
 
-export function formatLabel(format: ImageFormat): string {
-  if (format === 'jpeg') return 'JPEG'
-  if (format === 'png') return 'PNG'
-  return 'WebP'
+export function isOutputFormat(value: string): value is OutputFormat {
+  return value === 'jpeg' || value === 'png'
 }
 
-export function mimeForFormat(format: ImageFormat): string {
-  if (format === 'jpeg') return 'image/jpeg'
-  if (format === 'png') return 'image/png'
-  return 'image/webp'
+export function formatLabel(format: SourceFormat): string {
+  return SOURCE_LABELS[format]
+}
+
+export function mimeForFormat(format: OutputFormat): string {
+  return format === 'jpeg' ? 'image/jpeg' : 'image/png'
 }
 
 export function formatFileSize(bytes: number): string {
@@ -63,9 +72,9 @@ export function buildDownloadFilename(
   originalName: string,
   width: number,
   height: number,
-  format: ImageFormat,
+  format: OutputFormat,
 ): string {
-  const extension = format === 'jpeg' ? 'jpg' : format
+  const extension = format === 'jpeg' ? 'jpg' : 'png'
   return `${sanitizeBaseName(originalName)}-${width}x${height}.${extension}`
 }
 

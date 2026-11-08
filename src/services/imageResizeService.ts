@@ -135,9 +135,7 @@ export async function resizeImage(
 
   if (!blob) {
     throw new ImageProcessingError(
-      format === 'webp'
-        ? 'This browser could not create a WebP image. Choose PNG or JPEG instead.'
-        : 'This browser could not create the resized image. Try a different format or smaller dimensions.',
+      'This browser could not create the resized image. Try PNG or JPG, or smaller dimensions.',
     )
   }
 

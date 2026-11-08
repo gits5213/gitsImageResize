@@ -1,4 +1,4 @@
-import type { ImageFormat } from '../../types/image.types.ts'
+import type { SourceFormat } from '../../types/image.types.ts'
 import {
   formatDimensions,
   formatFileSize,
@@ -17,7 +17,7 @@ interface PreviewCardProps {
     width: number
     height: number
     byteSize: number
-    format: ImageFormat
+    format: SourceFormat
   } | null
   busy?: boolean
 }

@@ -1,5 +1,9 @@
 import { ImagePlus } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import {
+  IMAGE_FILE_ACCEPT,
+  SUPPORTED_UPLOAD_SUMMARY,
+} from '../../utils/imageValidation.ts'
 
 interface ImageUploaderProps {
   hasImage: boolean
@@ -66,7 +70,8 @@ export function ImageUploader({ hasImage, busy, onFile }: ImageUploaderProps) {
         {hasImage ? 'Drop a new image to replace the current one' : 'Drop an image here'}
       </p>
       <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-        JPEG, PNG, or WebP. The file stays in this browser.
+        {SUPPORTED_UPLOAD_SUMMARY}. Download is PNG or JPG. The file stays in this
+        browser.
       </p>
       <label className="mt-4 inline-flex min-h-11 cursor-pointer items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">
         <input
@@ -74,7 +79,7 @@ export function ImageUploader({ hasImage, busy, onFile }: ImageUploaderProps) {
           data-testid="file-input"
           className="sr-only"
           type="file"
-          accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+          accept={IMAGE_FILE_ACCEPT}
           disabled={busy}
           onChange={(event) => {
             takeFiles(event.target.files)

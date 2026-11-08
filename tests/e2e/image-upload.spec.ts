@@ -51,7 +51,9 @@ test('TC04 unsupported files are rejected', async ({ page }) => {
   await expect(page.getByTestId('original-meta')).toHaveCount(0)
 
   await resizer.choose(fixtures.gif)
-  await expect(page.getByTestId('error-message')).toContainText('not supported')
+  await expect(page.getByTestId('error-message')).toContainText(
+    /could not be read|corrupted/i,
+  )
 })
 
 test('TC05 original image information is shown', async ({ page }) => {

@@ -1,6 +1,6 @@
 # Image Resizer Pro
 
-Image Resizer Pro is a free, privacy-focused web app for resizing JPEG, PNG, and WebP images in the browser. Version 1.0 does not upload image contents to an application server, does not require an account, and does not use a database.
+Image Resizer Pro is a free, privacy-focused web app for resizing common image files in the browser. Version 1.0 does not upload image contents to an application server, does not require an account, and does not use a database.
 
 The project folder is `gitsImageResize`. The name shown in the interface is Image Resizer Pro.
 
@@ -8,11 +8,11 @@ The project folder is `gitsImageResize`. The name shown in the interface is Imag
 
 Version 1.0 includes:
 
-- Browse and drag-and-drop upload for JPEG, PNG, and WebP
+- Browse and drag-and-drop upload for JPG, PNG, GIF, WebP, BMP, AVIF, ICO, SVG, TIFF, and HEIC
 - Original filename, format, dimensions, and file size
 - Pixel width and height controls, with the aspect ratio locked by default
 - Original and resized previews
-- Local download as JPEG, PNG, or WebP
+- Local download as PNG or JPG
 - Reset dimensions and clear image
 - Light and dark themes
 - Privacy Policy, Terms of Use, Security & Privacy, Disclaimer, and Contact pages
@@ -169,7 +169,8 @@ The interface uses semantic regions, labeled controls, a skip link, visible focu
 - Enlarging an image does not add detail.
 - JPEG output cannot keep transparency.
 - Very large images can still take a moment to decode.
-- WebP encoding depends on the browser.
+- AVIF, TIFF, HEIC, and SVG open only when the browser can decode them. An animated GIF uses its first frame.
+- Downloads are PNG or JPG.
 - Legal pages are drafts.
 
 ## Troubleshooting

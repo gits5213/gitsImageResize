@@ -40,7 +40,8 @@ export function Home() {
           Resize Images Online for Free
         </h1>
         <p className="mt-4 max-w-2xl text-lg text-slate-600 dark:text-slate-300">
-          Resize JPG, PNG, and WebP images instantly in your browser.
+          Resize JPG, PNG, GIF, WebP, BMP, AVIF, ICO, SVG, TIFF, and HEIC images in your
+          browser, then download PNG or JPG.
         </p>
         <ul className="mt-4 max-w-2xl space-y-1 text-slate-700 dark:text-slate-200">
           <li>No registration.</li>

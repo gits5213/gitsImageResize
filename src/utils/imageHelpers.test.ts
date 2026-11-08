@@ -3,7 +3,7 @@ import {
   buildDownloadFilename,
   formatDimensions,
   formatFileSize,
-  isImageFormat,
+  isOutputFormat,
   linkedDimension,
 } from './imageHelpers.ts'
 
@@ -48,13 +48,15 @@ describe('buildDownloadFilename', () => {
     expect(buildDownloadFilename('<img onerror=alert(1)>.png', 8, 4, 'png')).not.toMatch(
       /[<>]/,
     )
-    expect(buildDownloadFilename('***', 1, 1, 'webp')).toBe('image-1x1.webp')
+    expect(buildDownloadFilename('***', 1, 1, 'jpeg')).toBe('image-1x1.jpg')
   })
 })
 
-describe('isImageFormat', () => {
-  it('accepts only the supported output formats', () => {
-    expect(isImageFormat('png')).toBe(true)
-    expect(isImageFormat('gif')).toBe(false)
+describe('isOutputFormat', () => {
+  it('accepts only PNG and JPG downloads', () => {
+    expect(isOutputFormat('png')).toBe(true)
+    expect(isOutputFormat('jpeg')).toBe(true)
+    expect(isOutputFormat('gif')).toBe(false)
+    expect(isOutputFormat('webp')).toBe(false)
   })
 })

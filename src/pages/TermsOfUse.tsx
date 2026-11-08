@@ -17,8 +17,8 @@ export function TermsOfUse() {
 
       <LegalSection heading="The service">
         <p>
-          The site lets you resize JPEG, PNG, and WebP images in your browser and download
-          the result. It is free to use in this version. There is no account. Availability
+          The site lets you resize common image files in your browser and download PNG or
+          JPG. It is free to use in this version. There is no account. Availability
           depends on GitHub Pages, your browser, and your device.
         </p>
       </LegalSection>

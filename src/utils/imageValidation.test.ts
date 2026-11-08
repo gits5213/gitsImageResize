@@ -72,14 +72,51 @@ describe('validateImageFile', () => {
     })
   })
 
+  it('accepts other common image signatures', async () => {
+    const cases: Array<[number[], string, string, string]> = [
+      [[0x47, 0x49, 0x46, 0x38, 0x39, 0x61], 'anim.gif', 'image/gif', 'gif'],
+      [[0x42, 0x4d, 0, 0], 'scan.bmp', 'image/bmp', 'bmp'],
+      [[0x49, 0x49, 0x2a, 0], 'scan.tif', 'image/tiff', 'tiff'],
+      [[0, 0, 1, 0], 'icon.ico', 'image/x-icon', 'ico'],
+      [
+        [0, 0, 0, 0x18, 0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x66],
+        'photo.avif',
+        'image/avif',
+        'avif',
+      ],
+      [
+        [0, 0, 0, 0x18, 0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x63],
+        'photo.heic',
+        'image/heic',
+        'heic',
+      ],
+    ]
+    for (const [bytes, name, type, format] of cases) {
+      await expect(validateImageFile(makeFile(bytes, name, type))).resolves.toEqual({
+        ok: true,
+        format,
+      })
+    }
+    const svg = new File(
+      ['<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"></svg>'],
+      'icon.svg',
+      { type: 'image/svg+xml' },
+    )
+    await expect(validateImageFile(svg)).resolves.toEqual({ ok: true, format: 'svg' })
+  })
+
   it('rejects unsupported types and corrupted signatures', async () => {
     const text = makeFile([104, 101, 108, 108, 111], 'notes.txt', 'text/plain')
     await expect(validateImageFile(text)).resolves.toMatchObject({ ok: false })
 
-    const gif = makeFile([0x47, 0x49, 0x46, 0x38, 0x39, 0x61], 'anim.gif', 'image/gif')
-    await expect(validateImageFile(gif)).resolves.toMatchObject({
+    const scripted = new File(
+      ['<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'],
+      'icon.svg',
+      { type: 'image/svg+xml' },
+    )
+    await expect(validateImageFile(scripted)).resolves.toMatchObject({
       ok: false,
-      message: expect.stringMatching(/not supported/) as unknown as string,
+      message: expect.stringMatching(/active content/) as unknown as string,
     })
 
     const corrupt = makeFile(
